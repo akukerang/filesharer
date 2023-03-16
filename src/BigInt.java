@@ -1,4 +1,5 @@
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class BigInt {
     private String value;
@@ -26,6 +27,7 @@ public class BigInt {
         return this.value.length();
     }
 
+
     public static String[] padNumbers(BigInt a, BigInt b){ //Returns two BigInt of same length by padding with zeroes.
         String padded;
         if(a.length() == b.length()){
@@ -39,9 +41,11 @@ public class BigInt {
         }
     }
 
+
+
     //Comparison
     public boolean equal(BigInt compare){
-        return this.value == compare.value;
+        return this.value.equals(compare.value);
     }
 
     public boolean lessThan(BigInt compare){ // this < compare
@@ -166,7 +170,7 @@ public class BigInt {
         if(this.equal(toSubtract)){
             return new BigInt("0");
         } else if (this.lessThan(toSubtract)){
-            return new BigInt("-1");
+            return new BigInt("0");
         }
         int carry = 0;
         String[] padded = padNumbers(this, toSubtract);
@@ -236,15 +240,82 @@ public class BigInt {
         return new BigInt(sbuff.toString());
     }
 
+    public BigInt exp2(){
+        return this.multiply(this);
+    }
+
+    public BigInt divideBy2(){
+        if(this.value.equals("1")){
+            return new BigInt("0");
+        }
+        if(this.value.equals("0")){
+            return new BigInt("0");
+        }
+        char[] charList = this.toChar();
+        StringBuilder sb = new StringBuilder();
+        int carry = 0;
+        for(int i = 0; i < charList.length; i++) {
+            int current = Character.getNumericValue(charList[i]);
+            int digit = current / 2 + carry;
+            carry = current % 2 * 5;
+            sb.append(digit);
+        }
+        while(sb.charAt(0) == '0'){
+            sb.deleteCharAt(0);
+        }        
+        return new BigInt(sb.toString());
+    }
+    
+    public BigInt mod(BigInt modulo){
+        BigInt remainder = this;
+        while(remainder.greaterThan(modulo)){
+
+            remainder = remainder.subtract(modulo);
+        }
+        if(remainder.equal(modulo)){
+            return new BigInt("0");
+        }
+        return remainder;
+    }
+
+    public boolean checkEven(){
+        char[] chars = this.toChar();
+        if(chars[chars.length -1] % 2 == 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public static ArrayList<BigInt> toBinary(BigInt input){
+        ArrayList<BigInt> K = new ArrayList<BigInt>();
+        BigInt temp = input;
+        BigInt temp2;
+        int i = 0;
+        while(temp.greaterThan(new BigInt("0"))){ // when k > 0 == 1
+            K.add(temp.checkEven() ? new BigInt("0") : new BigInt("1"));       
+            temp2 = temp.subtract(K.get(i));
+            temp = temp2.divideBy2();
+            i++;
+
+
+        }
+        return K;
+    }
+
+
 
 
     public static void main(String[] args) {
-        BigInt a = new BigInt("149018210");
-        BigInt b = new BigInt("12342");
+        BigInt a = new BigInt("8902348093240329");
+        BigInt b = new BigInt("1");
+        ArrayList<BigInt> aee = toBinary(a);
+        // System.out.println(a.mod(new BigInt("2")).value);
 
-
-        System.out.println((a.multiply(b)).getValue());
-        System.out.println(new BigInteger("149018210").multiply(new BigInteger("12342")));
+        for(int i = aee.size() -1; i >= 0; i--){
+            System.out.print(aee.get(i).value);
+        }
 
     }
 

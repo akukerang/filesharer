@@ -13,20 +13,6 @@ public class App {
         return res;
     }
 
-
-    public static BigInteger[] findR(BigInteger n){ //input odd
-        BigInteger N = n.subtract(BigInteger.ONE); //turn to even
-        BigInteger[] results = new BigInteger[2];
-        int count = 0;
-        while(N.mod(BigInteger.TWO).equals(BigInteger.ZERO)){
-            N = N.divide(BigInteger.TWO);
-            count++;
-        }
-        results[0] = N;
-        results[1] = BigInteger.valueOf(count);
-        return results;
-    }
-
     public static ArrayList<BigInteger> BinaryK(BigInteger k){
         ArrayList<BigInteger> K = new ArrayList<BigInteger>();
         BigInteger temp = k;
