@@ -102,6 +102,14 @@ public class App {
         return true;
     }
 
+    // public static BigInteger primitiveRoot(BigInteger p){
+    //     //finds the generator for prime number p.
+
+        
+
+
+
+    // }
 
 
     public static void main(String[] args) throws Exception {
