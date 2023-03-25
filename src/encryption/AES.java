@@ -1,4 +1,6 @@
 package encryption;
+import java.math.BigInteger;
+
 import math.BigInt;
 public class AES {
     static String[][] sBox = {
@@ -28,9 +30,9 @@ public class AES {
         {3,1,1,2}
     };
 
-    BigInt key;
+    String key;
     public AES(String key){
-        this.key = new BigInt("key"); 
+        this.key = key;
         // 128 bit key - 10 rounds
         // 192 bit key - 12 rounds
         // 256 bit key - 14 rounds
@@ -54,8 +56,13 @@ public class AES {
         int x, y;
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++){
-                x = Integer.parseInt(block[i][j].substring(0,1),16);
-                y = Integer.parseInt(block[i][j].substring(1,2),16);
+                if(block[i][j].length() == 1){
+                    x = Integer.parseInt("0",16);
+                    y = Integer.parseInt(block[i][j].substring(0,1),16);
+                } else {
+                    x = Integer.parseInt(block[i][j].substring(0,1),16);
+                    y = Integer.parseInt(block[i][j].substring(1,2),16);
+                }
                 subBytes[i][j] = sBox[x][y];
             }
         }
@@ -117,10 +124,31 @@ public class AES {
         return p;
     }
     
-    public static String[][] addRoundKey(String[][] block, String[][] key){
+    public static String[][] addRoundKey(String[][] block, String key){
         String[][] added = new String[4][4];
-
+        String[][] keyArray = binaryToHex(key);
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                added[i][j] = Integer.toHexString(
+                    Integer.parseInt(block[i][j],16) ^
+                    Integer.parseInt(keyArray[i][j],16));
+            }
+        }
         return added;
+    }
+
+    public static String[][] binaryToHex(String binary){ // input: 128-bit
+        String[][] hex = new String[4][4];
+        int k = 0;
+        for(int i = 0; i < 4; i++){
+            for (int j = 0; j < 4; j++){
+                hex[i][j] = Integer.toHexString(
+                    Integer.parseInt(binary.substring(k,k+8),2)
+                    ); //Binary to Hex
+                k+=8;
+            }
+        }
+        return hex;
     }
 
     public static String[] keySchedule(String key){ // Input binary, Output binary
@@ -165,24 +193,30 @@ public class AES {
     }
 
 
-    public int encryptBlock(String block){
-        //convert message to numbers.
-        if(block.length() < 128){ 
-            block = "0".repeat(128 - block.length()) + block;
-        }
+    public String[][] encryptBlock(String[][] block){
 
-
+        String[] keys = keySchedule(this.key);
+        String[][] encrypt = addRoundKey(block, keys[0]);
 
         for(int i = 0; i < 9; i++){
-        //(Rounds based off key size)
-        // Byte Substitution
-
-        //Shift Row
-        // Mix Column
-        //Key addition 
+            //(Rounds based off key size)
+            // Byte Substitution
+            encrypt = subBytes(encrypt);
+            //Shift Row
+            encrypt = shiftRow(encrypt);
+            // Mix Column
+            encrypt = mixColumn(encrypt);
+            //Key addition 
+            encrypt = addRoundKey(encrypt, keys[i]);
         }
+        //Final Round
+        encrypt = subBytes(encrypt);
+        //Shift Row
+        encrypt = shiftRow(encrypt);
+        //Key addition 
+        encrypt = addRoundKey(encrypt, keys[10]);
         //Final Round no mix column
-        return 0;
+        return encrypt;
     }
 
     public String decrypt(){
@@ -200,12 +234,16 @@ public class AES {
             {"a2","20","cb","2b"},
 
         };
+        AES test = new AES("11100011");
+        String[][] cipher = test.encryptBlock(temp);
 
-        String[] keys = keySchedule("10101010100100010001011100");
 
-        for(int i = 0; i < keys.length; i++){
-            System.out.println(keys[i]);
+       for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            System.out.print(cipher[i][j]);
         }
+        System.out.println();
+       }
     
     }
 
