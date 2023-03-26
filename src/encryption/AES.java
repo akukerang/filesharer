@@ -1,7 +1,4 @@
 package encryption;
-import java.math.BigInteger;
-
-import math.BigInt;
 public class AES {
     static String[][] sBox = {
         {"63", 	"7c", 	"77", 	"7b", 	"f2", 	"6b", 	"6f", 	"c5", 	"30", 	"01", 	"67", 	"2b", 	"fe", 	"d7", 	"ab", 	"76"},
@@ -22,6 +19,25 @@ public class AES {
      	{"8c", 	"a1", 	"89", 	"0d", 	"bf", 	"e6", 	"42", 	"68", 	"41", 	"99", 	"2d", 	"0f", 	"b0", 	"54", 	"bb", 	"16"}, 
     };
 
+    static String[][] invSBox = {
+        {"52", 	"09", 	"6a", 	"d5", 	"30", 	"36", 	"a5", 	"38", 	"bf", 	"40", 	"a3", 	"9e", 	"81", 	"f3", 	"d7", 	"fb"},
+        {"7c", 	"e3", 	"39", 	"82", 	"9b", 	"2f", 	"ff", 	"87", 	"34", 	"8e", 	"43", 	"44", 	"c4", 	"de", 	"e9", 	"cb"},
+        {"54", 	"7b", 	"94", 	"32", 	"a6", 	"c2", 	"23", 	"3d", 	"ee", 	"4c", 	"95", 	"0b", 	"42", 	"fa", 	"c3", 	"4e"},
+        {"08", 	"2e", 	"a1", 	"66", 	"28", 	"d9", 	"24", 	"b2", 	"76", 	"5b", 	"a2", 	"49", 	"6d", 	"8b", 	"d1", 	"25"},
+        {"72", 	"f8", 	"f6", 	"64", 	"86", 	"68", 	"98", 	"16", 	"d4", 	"a4", 	"5c", 	"cc", 	"5d", 	"65", 	"b6", 	"92"},
+        {"6c", 	"70", 	"48", 	"50", 	"fd", 	"ed", 	"b9", 	"da", 	"5e", 	"15", 	"46", 	"57", 	"a7", 	"8d", 	"9d", 	"84"},
+        {"90", 	"d8", 	"ab", 	"00", 	"8c", 	"bc", 	"d3", 	"0a", 	"f7", 	"e4", 	"58", 	"05", 	"b8", 	"b3", 	"45", 	"06"},
+        {"d0", 	"2c", 	"1e", 	"8f", 	"ca", 	"3f", 	"0f", 	"02", 	"c1", 	"af", 	"bd", 	"03", 	"01", 	"13", 	"8a", 	"6b"},
+        {"3a", 	"91", 	"11", 	"41", 	"4f", 	"67", 	"dc", 	"ea", 	"97", 	"f2", 	"cf", 	"ce", 	"f0", 	"b4", 	"e6", 	"73"},
+        {"96", 	"ac", 	"74", 	"22", 	"e7", 	"ad", 	"35", 	"85", 	"e2", 	"f9", 	"37", 	"e8", 	"1c", 	"75", 	"df", 	"6e"},
+        {"47", 	"f1", 	"1a", 	"71", 	"1d", 	"29", 	"c5", 	"89", 	"6f", 	"b7", 	"62", 	"0e", 	"aa", 	"18", 	"be", 	"1b"},
+        {"fc", 	"56", 	"3e", 	"4b", 	"c6", 	"d2", 	"79", 	"20", 	"9a", 	"db", 	"c0", 	"fe", 	"78", 	"cd", 	"5a", 	"f4"},
+        {"1f", 	"dd", 	"a8", 	"33", 	"88", 	"07", 	"c7", 	"31", 	"b1", 	"12", 	"10", 	"59", 	"27", 	"80", 	"ec", 	"5f"},
+        {"60", 	"51", 	"7f", 	"a9", 	"19", 	"b5", 	"4a", 	"0d", 	"2d", 	"e5", 	"7a", 	"9f", 	"93", 	"c9", 	"9c", 	"ef"},
+        {"a0", 	"e0", 	"3b", 	"4d", 	"ae", 	"2a", 	"f5", 	"b0", 	"c8", 	"eb", 	"bb", 	"3c", 	"83", 	"53", 	"99", 	"61"},
+        {"17", 	"2b", 	"04", 	"7e", 	"ba", 	"77", 	"d6", 	"26", 	"e1", 	"69", 	"14", 	"63", 	"55", 	"21", 	"0c", 	"7d"},
+    };
+
 
     static int[][] mixPublic = {
         {2,3,1,1},
@@ -30,12 +46,34 @@ public class AES {
         {3,1,1,2}
     };
 
+    static int[][] invMixPublic = {
+        {14,11,13,9},
+        {9,14,11,13},
+        {13,9,14,11},
+        {11,13,9,14},
+    };
+
+    static int[] rcon = {
+        0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36
+    };
+
     String key;
     public AES(String key){
         this.key = key;
         // 128 bit key - 10 rounds
         // 192 bit key - 12 rounds
         // 256 bit key - 14 rounds
+    }
+
+    public static void printArray(String[][] input){
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                System.out.print(input[i][j]+ " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
     }
 
     public static String[][] bytesToHex(byte[] input) {
@@ -69,6 +107,40 @@ public class AES {
         return subBytes; 
     }
 
+    public static String subBytesKey(String input){
+        int x, y;
+        String[] hex = new String[4];
+        for(int i = 0; i < 32; i+=8){
+            x = Integer.parseInt(
+                input.substring(i, i+4), 2
+            );
+            y = Integer.parseInt(
+                input.substring(i+4, i+8), 2
+            );
+            
+            hex[i / 8] = sBox[x][y];
+        }
+        return hexToBinaryString(hex, 8);
+    }
+    
+    public String[][] invSubBytes(String[][] block){
+        String[][] subBytes = new String[4][4];
+        int x, y;
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                if(block[i][j].length() == 1){
+                    x = Integer.parseInt("0",16);
+                    y = Integer.parseInt(block[i][j].substring(0,1),16);
+                } else {
+                    x = Integer.parseInt(block[i][j].substring(0,1),16);
+                    y = Integer.parseInt(block[i][j].substring(1,2),16);
+                }
+                subBytes[i][j] = invSBox[x][y];
+            }
+        }
+        return subBytes; 
+    }
+
     public String[][] shiftRow(String[][] block){
         String[][] shift = new String[4][4];
         shift[0] = block[0]; //no shift
@@ -91,6 +163,28 @@ public class AES {
         return shift;
     }
 
+    public String[][] invShiftRow(String[][] block){
+        String[][] shift = new String[4][4];
+        shift[0] = block[0]; //no shift
+        //shift right once
+        shift[1][0] = block[1][3];
+        shift[1][1] = block[1][0];
+        shift[1][2] = block[1][1];
+        shift[1][3] = block[1][2];
+        //shift right twice
+        shift[2][0] = block[2][2];
+        shift[2][1] = block[2][3];
+        shift[2][2] = block[2][0];
+        shift[2][3] = block[2][1];
+        //shift right thrice
+        shift[3][0] = block[3][1];
+        shift[3][1] = block[3][2];
+        shift[3][2] = block[3][3];
+        shift[3][3] = block[3][0];
+        return shift;
+    }
+ 
+
 
     public static String[][] mixColumn(String[][] block) {
         String[][] mixed = new String[4][4];
@@ -100,6 +194,22 @@ public class AES {
                 for (int k = 0; k < 4; k++) {
                     int element = Integer.parseInt(block[k][i], 16);
                     int mix = mixPublic[j][k];
+                    temp[k] = multiply(element, mix);
+                }
+                mixed[j][i] = Integer.toHexString((temp[0] ^ temp[1] ^ temp[2] ^ temp[3]) & 0xff); //overflow
+            }
+        }
+        return mixed;
+    }
+
+    public static String[][] invMixColumn(String[][] block) {
+        String[][] mixed = new String[4][4];
+        int[] temp = new int[4];
+        for (int i = 0; i < 4; i++) { // Column
+            for (int j = 0; j < 4; j++) { // Row
+                for (int k = 0; k < 4; k++) {
+                    int element = Integer.parseInt(block[k][i], 16);
+                    int mix = invMixPublic[j][k];
                     temp[k] = multiply(element, mix);
                 }
                 mixed[j][i] = Integer.toHexString((temp[0] ^ temp[1] ^ temp[2] ^ temp[3]) & 0xff); //overflow
@@ -142,7 +252,7 @@ public class AES {
         int k = 0;
         for(int i = 0; i < 4; i++){
             for (int j = 0; j < 4; j++){
-                hex[i][j] = Integer.toHexString(
+                hex[j][i] = Integer.toHexString(
                     Integer.parseInt(binary.substring(k,k+8),2)
                     ); //Binary to Hex
                 k+=8;
@@ -151,14 +261,57 @@ public class AES {
         return hex;
     }
 
+    public static String binaryToHexString(String binary){
+        StringBuilder str = new StringBuilder();
+        String temp;
+        for(int i = 0; i < 32; i+=8){
+            temp = Integer.toHexString(
+                Integer.parseInt(binary.substring(i,i+8),2)
+                );
+            if(temp.length() == 1){
+                temp = "0"+temp;
+            }
+            str.append(temp);
+        }
+        return str.toString();
+    }
+
+    public static String hexToBinaryString(String[] hex, int bitSize){
+        String temp;
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i < hex.length; i++){
+            temp = Integer.toBinaryString(Integer.parseInt(hex[i],16));
+            temp = "0".repeat(bitSize-temp.length()) + temp;   
+            str.append(temp);
+        }
+        return str.toString();
+    }
+
+    public static String addRcon(String input, int rcon){
+        String input_section = input.substring(0,8);
+        int added = (Integer.parseInt(input_section, 2) ^ rcon) & 0xFF;
+        String addedBinary = Integer.toBinaryString(added);
+        addedBinary = "0".repeat(8-addedBinary.length()) + addedBinary + input.substring(8,32);
+        return addedBinary;
+    }
+//https://csrc.nist.gov/csrc/media/publications/fips/197/final/documents/fips-197.pdf
     public static String[] keySchedule(String key){ // Input binary, Output binary
         String[] keys = new String[11];
         StringBuilder str = new StringBuilder();
         keys[0] = "0".repeat(128 - key.length()) + key;
         String temp;
+        String temp2;
         for(int i = 1; i < 11; i++){
+            //w[3] editing
+            System.out.println("Round" + i);
+            temp2 = keys[i-1].substring(104,128) + keys[i-1].substring(96,104); //rotate
+            System.out.println("Rotate: " + binaryToHexString(temp2));
+            temp2 = subBytesKey(temp2); //subbyte
+            System.out.println("Sub: " + binaryToHexString(temp2));
+            temp2 = addRcon(temp2, rcon[i-1]);
+            System.out.println("Rcon: " + binaryToHexString(temp2));
             temp = xor(keys[i-1].substring(0,32), //w[0] xor w[3]
-                keys[i-1].substring(96,128));
+                temp2);
             str.append(temp);
             temp = xor(temp, keys[i-1].substring(32,64)); // temp xor w[1]
             str.append(temp);
@@ -167,6 +320,7 @@ public class AES {
             temp = xor(temp, keys[i-1].substring(96,128)); // temp xor w[3]
             str.append(temp);
             keys[i] = str.toString();
+
             str = new StringBuilder();
         }
         return keys;
@@ -194,20 +348,31 @@ public class AES {
 
 
     public String[][] encryptBlock(String[][] block){
-
+        System.out.println("Input");
+        printArray(block);
         String[] keys = keySchedule(this.key);
         String[][] encrypt = addRoundKey(block, keys[0]);
-
+        System.out.println("Round 0");
+        printArray(encrypt);
         for(int i = 0; i < 9; i++){
+            System.out.println("Round " + (i+1));
             //(Rounds based off key size)
             // Byte Substitution
             encrypt = subBytes(encrypt);
+            System.out.println("Sub byte");
+            printArray(encrypt);
             //Shift Row
             encrypt = shiftRow(encrypt);
+            System.out.println("Shift Left");
+            printArray(encrypt);
             // Mix Column
             encrypt = mixColumn(encrypt);
+            System.out.println("Mix column");
+            printArray(encrypt);
             //Key addition 
             encrypt = addRoundKey(encrypt, keys[i]);
+            System.out.println("Add Roundkey");
+            printArray(encrypt);
         }
         //Final Round
         encrypt = subBytes(encrypt);
@@ -218,32 +383,77 @@ public class AES {
         //Final Round no mix column
         return encrypt;
     }
+    public String[][] decryptBlock(String[][] block){
 
-    public String decrypt(){
+        String[] keys = keySchedule(this.key);
+        String[][] decrypt = addRoundKey(block, keys[0]);
 
-        return "";
+        for(int i = 0; i < 9; i++){
+            //(Rounds based off key size)
+            // Byte Substitution
+            decrypt = invSubBytes(decrypt);
+            //Shift Row
+            decrypt = invShiftRow(decrypt);
+            // Mix Column
+            decrypt = invMixColumn(decrypt);
+            //Key addition 
+            decrypt = addRoundKey(decrypt, keys[i]);
+        }
+        //Final Round
+        decrypt = invSubBytes(decrypt);
+        //Shift Row
+        decrypt = invShiftRow(decrypt);
+        //Key addition 
+        decrypt = addRoundKey(decrypt, keys[10]);
+        //Final Round no mix column
+        return decrypt;
+    }
+
+    public static void printArrayT(String[][] input){
+        String temp;
+        for(int i = 0; i < 4; i++){
+            String out = "0x";
+            for(int j = 0; j < 4; j++){
+                temp = input[j][i];
+                temp = "0".repeat(2-temp.length()) + temp;
+                out+=temp;
+            }
+            System.out.println(out);
+        }
+        System.out.println();
+
     }
 
     public static void main(String[] args) {
+    // String[] test = {"54", "68", "61", "74", "73", "20", "6D", "79", "20", "4B", "75", "6E", "67", "20", "46", "75"};
+    String[] test = {"2b", "7e", "15", "16", "28", "ae", "d2", "a6", "ab", "f7", "15", "88", "09", "cf", "4f", "3c"};
+    StringBuilder str = new StringBuilder();
+    String temp;
+    for(int i = 0; i < test.length; i++){
+        temp = Integer.toBinaryString(Integer.parseInt(test[i],16));
+        temp = "0".repeat(8-temp.length()) + temp;
+        str.append(temp);
+            
+    }
+    String key = str.toString();
+    String[] keys = keySchedule(key);
+    for(int i = 0; i < keys.length; i++){
+        System.out.println("Round " + i);
+        printArrayT(binaryToHex(keys[i]));
+    }
 
+    String[][] input = {
+        {"54","4f","4e","20"},
+        {"77","6e","69","54"},
+        {"6f","65","6e","77"},
+        {"20","20","65","6f"},
+    };
 
-        String[][] temp = {
-            {"63","eb","9f","a0"},
-            {"2f","93","92","c0"},
-            {"af","c7","ab","30"},
-            {"a2","20","cb","2b"},
-
-        };
-        AES test = new AES("11100011");
-        String[][] cipher = test.encryptBlock(temp);
-
-
-       for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
-            System.out.print(cipher[i][j]);
-        }
-        System.out.println();
-       }
+    AES a = new AES(key);
+    String[][] cipher = a.encryptBlock(input);
+    String[][] message = a.decryptBlock(cipher);
+    printArray(input);
+    printArray(message);
     
     }
 
