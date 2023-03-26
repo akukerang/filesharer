@@ -303,13 +303,9 @@ public class AES {
         String temp2;
         for(int i = 1; i < 11; i++){
             //w[3] editing
-            System.out.println("Round" + i);
             temp2 = keys[i-1].substring(104,128) + keys[i-1].substring(96,104); //rotate
-            System.out.println("Rotate: " + binaryToHexString(temp2));
             temp2 = subBytesKey(temp2); //subbyte
-            System.out.println("Sub: " + binaryToHexString(temp2));
             temp2 = addRcon(temp2, rcon[i-1]);
-            System.out.println("Rcon: " + binaryToHexString(temp2));
             temp = xor(keys[i-1].substring(0,32), //w[0] xor w[3]
                 temp2);
             str.append(temp);
@@ -348,31 +344,22 @@ public class AES {
 
 
     public String[][] encryptBlock(String[][] block){
-        System.out.println("Input");
-        printArray(block);
         String[] keys = keySchedule(this.key);
         String[][] encrypt = addRoundKey(block, keys[0]);
-        System.out.println("Round 0");
-        printArray(encrypt);
         for(int i = 0; i < 9; i++){
-            System.out.println("Round " + (i+1));
             //(Rounds based off key size)
             // Byte Substitution
             encrypt = subBytes(encrypt);
-            System.out.println("Sub byte");
-            printArray(encrypt);
+
             //Shift Row
             encrypt = shiftRow(encrypt);
-            System.out.println("Shift Left");
-            printArray(encrypt);
+
             // Mix Column
             encrypt = mixColumn(encrypt);
-            System.out.println("Mix column");
-            printArray(encrypt);
+
             //Key addition 
-            encrypt = addRoundKey(encrypt, keys[i]);
-            System.out.println("Add Roundkey");
-            printArray(encrypt);
+            encrypt = addRoundKey(encrypt, keys[i+1]);
+
         }
         //Final Round
         encrypt = subBytes(encrypt);
@@ -384,77 +371,84 @@ public class AES {
         return encrypt;
     }
     public String[][] decryptBlock(String[][] block){
+        printArrayT(block);
 
         String[] keys = keySchedule(this.key);
-        String[][] decrypt = addRoundKey(block, keys[0]);
-
-        for(int i = 0; i < 9; i++){
+        String[][] decrypt = addRoundKey(block, keys[10]);
+        printArrayT(decrypt);
+        for(int i = 9; i > 0; i--){
+            System.out.println("Round " + i);
             //(Rounds based off key size)
-            // Byte Substitution
-            decrypt = invSubBytes(decrypt);
             //Shift Row
             decrypt = invShiftRow(decrypt);
+            System.out.println("Shift");
+            printArrayT(decrypt);
+            // Byte Substitution
+            decrypt = invSubBytes(decrypt);
+            System.out.println("Sub");
+            printArrayT(decrypt);
+   
+            //Key addition 
+            decrypt = addRoundKey(decrypt, keys[i+1]);
+            System.out.println("Add");
+            printArrayT(decrypt);
             // Mix Column
             decrypt = invMixColumn(decrypt);
-            //Key addition 
-            decrypt = addRoundKey(decrypt, keys[i]);
+            System.out.println("Mix");
+            printArrayT(decrypt);
+
         }
+        decrypt = invShiftRow(decrypt);
+
         //Final Round
         decrypt = invSubBytes(decrypt);
         //Shift Row
-        decrypt = invShiftRow(decrypt);
         //Key addition 
-        decrypt = addRoundKey(decrypt, keys[10]);
+        decrypt = addRoundKey(decrypt, keys[0]);
         //Final Round no mix column
+        printArrayT(decrypt);
         return decrypt;
     }
 
     public static void printArrayT(String[][] input){
         String temp;
+        String out = "";
+
         for(int i = 0; i < 4; i++){
-            String out = "0x";
             for(int j = 0; j < 4; j++){
                 temp = input[j][i];
                 temp = "0".repeat(2-temp.length()) + temp;
                 out+=temp;
             }
-            System.out.println(out);
         }
-        System.out.println();
+        System.out.println(out);
 
     }
 
     public static void main(String[] args) {
-    // String[] test = {"54", "68", "61", "74", "73", "20", "6D", "79", "20", "4B", "75", "6E", "67", "20", "46", "75"};
-    String[] test = {"2b", "7e", "15", "16", "28", "ae", "d2", "a6", "ab", "f7", "15", "88", "09", "cf", "4f", "3c"};
+    String inputKey = "000102030405060708090a0b0c0d0e0f";
+    String inputMessage = "00112233445566778899aabbccddeeff";
     StringBuilder str = new StringBuilder();
     String temp;
-    for(int i = 0; i < test.length; i++){
-        temp = Integer.toBinaryString(Integer.parseInt(test[i],16));
+    for(int i = 0; i < inputKey.length(); i+=2){
+        temp = Integer.toBinaryString(Integer.parseInt(inputKey.substring(i,i+2), 16));
         temp = "0".repeat(8-temp.length()) + temp;
         str.append(temp);
             
     }
     String key = str.toString();
-    String[] keys = keySchedule(key);
-    for(int i = 0; i < keys.length; i++){
-        System.out.println("Round " + i);
-        printArrayT(binaryToHex(keys[i]));
+    String[][] input = new String[4][4];
+    int k = 0;
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            input[j][i] = inputMessage.substring(k,k+2);
+            k+=2;
+        }
     }
-
-    String[][] input = {
-        {"54","4f","4e","20"},
-        {"77","6e","69","54"},
-        {"6f","65","6e","77"},
-        {"20","20","65","6f"},
-    };
-
     AES a = new AES(key);
     String[][] cipher = a.encryptBlock(input);
     String[][] message = a.decryptBlock(cipher);
-    printArray(input);
-    printArray(message);
-    
+
     }
 
 }
