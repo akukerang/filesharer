@@ -14,7 +14,6 @@ public class test {
                 System.out.print(bytes[i] + ", ");
             }
 
-            // Files.write(Paths.get(filePath2), bytes);
         } catch(IOException e)  {
             System.out.println(e);
         }

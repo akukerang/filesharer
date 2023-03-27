@@ -1,4 +1,9 @@
 package encryption;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Currency;
 public class AES {
     static String[][] sBox = {
         {"63", 	"7c", 	"77", 	"7b", 	"f2", 	"6b", 	"6f", 	"c5", 	"30", 	"01", 	"67", 	"2b", 	"fe", 	"d7", 	"ab", 	"76"},
@@ -60,9 +65,6 @@ public class AES {
     String key;
     public AES(String key){
         this.key = key;
-        // 128 bit key - 10 rounds
-        // 192 bit key - 12 rounds
-        // 256 bit key - 14 rounds
     }
 
     public static void printArray(String[][] input){
@@ -76,16 +78,17 @@ public class AES {
 
     }
 
-    public static String[][] bytesToHex(byte[] input) {
-        String[][] hex = new String[4][4];
-        int k = 0;
-        for(int i = 0; i < 4; i++){
-            for (int j = 0; j < 4; j++){
-                hex[i][j] = String.format("%02X", input[k]);
-                k++;
-            }
-        } 
-        return hex;
+    public static void bytesToHexBlock(byte[] input) {
+
+        // String[][][] ex = new String[4][4];
+        // int k = 0;
+        // for(int i = 0; i < 4; i++){
+        //     for (int j = 0; j < 4; j++){
+        //         hex[i][j] = String.format("%02X", input[k]);
+        //         k++;
+        //     }
+        // } 
+        // return hex;
     }
     
 
@@ -294,7 +297,7 @@ public class AES {
         addedBinary = "0".repeat(8-addedBinary.length()) + addedBinary + input.substring(8,32);
         return addedBinary;
     }
-//https://csrc.nist.gov/csrc/media/publications/fips/197/final/documents/fips-197.pdf
+
     public static String[] keySchedule(String key){ // Input binary, Output binary
         String[] keys = new String[11];
         StringBuilder str = new StringBuilder();
@@ -371,31 +374,21 @@ public class AES {
         return encrypt;
     }
     public String[][] decryptBlock(String[][] block){
-        printArrayT(block);
-
         String[] keys = keySchedule(this.key);
         String[][] decrypt = addRoundKey(block, keys[10]);
-        printArrayT(decrypt);
         for(int i = 9; i > 0; i--){
-            System.out.println("Round " + i);
             //(Rounds based off key size)
             //Shift Row
             decrypt = invShiftRow(decrypt);
-            System.out.println("Shift");
-            printArrayT(decrypt);
+
             // Byte Substitution
             decrypt = invSubBytes(decrypt);
-            System.out.println("Sub");
-            printArrayT(decrypt);
    
             //Key addition 
-            decrypt = addRoundKey(decrypt, keys[i+1]);
-            System.out.println("Add");
-            printArrayT(decrypt);
+            decrypt = addRoundKey(decrypt, keys[i]);
+
             // Mix Column
             decrypt = invMixColumn(decrypt);
-            System.out.println("Mix");
-            printArrayT(decrypt);
 
         }
         decrypt = invShiftRow(decrypt);
@@ -406,48 +399,121 @@ public class AES {
         //Key addition 
         decrypt = addRoundKey(decrypt, keys[0]);
         //Final Round no mix column
-        printArrayT(decrypt);
+
         return decrypt;
     }
 
-    public static void printArrayT(String[][] input){
-        String temp;
-        String out = "";
-
+    public static String[][] StringTo2dArray(String input){
+        String[][] output = new String[4][4];
+        int k = 0;
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++){
-                temp = input[j][i];
-                temp = "0".repeat(2-temp.length()) + temp;
-                out+=temp;
+                output[j][i] = input.substring(k,k+2);
+                k+=2;
             }
         }
-        System.out.println(out);
-
+        return output;
     }
 
-    public static void main(String[] args) {
-    String inputKey = "000102030405060708090a0b0c0d0e0f";
-    String inputMessage = "00112233445566778899aabbccddeeff";
-    StringBuilder str = new StringBuilder();
-    String temp;
-    for(int i = 0; i < inputKey.length(); i+=2){
-        temp = Integer.toBinaryString(Integer.parseInt(inputKey.substring(i,i+2), 16));
-        temp = "0".repeat(8-temp.length()) + temp;
-        str.append(temp);
-            
-    }
-    String key = str.toString();
-    String[][] input = new String[4][4];
-    int k = 0;
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
-            input[j][i] = inputMessage.substring(k,k+2);
-            k+=2;
+    
+    public static String ArrayToString(String[][] input){
+        StringBuilder str = new StringBuilder();
+        String current;
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                current = input[j][i];
+                if(current.length() == 1){
+                    current = "0"+current;
+                }
+                str.append(current);
+            }
         }
+        return str.toString();
     }
-    AES a = new AES(key);
-    String[][] cipher = a.encryptBlock(input);
-    String[][] message = a.decryptBlock(cipher);
+
+    public static void main(String[] args) throws IOException{
+        String inputKey = "000102030405060708090a0b0c0d0e0f";
+        StringBuilder str = new StringBuilder();
+        String temp;
+        for(int i = 0; i < inputKey.length(); i+=2){
+            temp = Integer.toBinaryString(Integer.parseInt(inputKey.substring(i,i+2), 16));
+            temp = "0".repeat(8-temp.length()) + temp;
+            str.append(temp);   
+        }
+        String key = str.toString();
+
+
+     
+        String filePath = "F:\\repos\\Filesharer\\src\\files\\pomu.jpg";
+        String filePath2 = "F:\\repos\\Filesharer\\src\\files\\encrypted.jpg";
+        String filePath3 = "F:\\repos\\Filesharer\\src\\files\\pomuDecrypt.jpg";
+
+        byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+        str = new StringBuilder();
+
+        for (int i = 0; i < bytes.length; i++) {
+            String val = Integer.toHexString(bytes[i] & 0xFF);
+            if(val.length() == 1){
+                val = "0" + val;
+            }
+            str.append(val);
+        }
+        String hex = str.toString();
+        String padded = "0".repeat(32 -(hex.length() % 32)) + hex;
+
+        AES a = new AES(key);
+        ArrayList<String[][]> ciphers = new ArrayList<String[][]>();
+        for(int i = 0; i < padded.length(); i+=32){
+            String[][] current = StringTo2dArray(padded.substring(i, i+32));
+            String[][] currentCipher = a.encryptBlock(current);
+            ciphers.add(currentCipher);
+        }
+
+        
+        str = new StringBuilder();
+        for(int i = 0; i < ciphers.size(); i++){
+            String cipherCurrent = ArrayToString(ciphers.get(i));
+            str.append(cipherCurrent);
+        }
+        String encrypted = str.toString();
+        byte[] encryptedBytes = new byte[encrypted.length() / 2];
+        for(int i = 0; i < encrypted.length(); i+=2){
+            String current = encrypted.substring(i, i+2);
+            int currentVal = Integer.parseInt(current, 16);
+            if(currentVal >= 128){
+                currentVal -= 256;
+            }
+            encryptedBytes[i/2] = (byte) currentVal;
+        }
+        Files.write(Paths.get(filePath2), encryptedBytes);
+
+
+
+
+
+        str = new StringBuilder();
+        for(int i = 0; i < ciphers.size(); i++){
+            String decryptCurrent = ArrayToString(a.decryptBlock(ciphers.get(i)));
+            str.append(decryptCurrent);
+        }
+        String newHex = str.toString();
+        while(newHex.substring(0,2).equals("00")){
+            newHex = newHex.substring(2);
+        }
+
+        byte[] newB = new byte[newHex.length() / 2];
+        for(int i = 0; i < newHex.length(); i+=2){
+            String current = newHex.substring(i, i+2);
+            int currentVal = Integer.parseInt(current, 16);
+            if(currentVal >= 128){
+                currentVal -= 256;
+            }
+            newB[i/2] = (byte) currentVal;
+        }
+        Files.write(Paths.get(filePath3), newB);
+
+   
+
 
     }
 
