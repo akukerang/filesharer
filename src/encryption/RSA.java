@@ -21,17 +21,16 @@ public class RSA {
         this.p = Helper.generatePrime(new BigInteger("3"), bit1024);
         this.q = Helper.generatePrime(new BigInteger("3"), bit1024); 
         this.n = p.multiply(q);
-        this.phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
-        this.e = Helper.generatePrime(BigInteger.ONE, this.phi.subtract(BigInteger.ONE));
-        BigInteger temp[] = Helper.EEA(this.e, this.phi);
-        if(temp[0].equals(this.e)){ //Sets d to variable that isn't e.
-            this.d = temp[1];
-        } else {
-            this.d = temp[0];
-        }
+        this.phi = (p.subtract(BigInteger.ONE)).multiply((q.subtract(BigInteger.ONE)));
+        BigInteger[] temp;
+        do {
+            this.e = Helper.generatePrime(BigInteger.ONE, this.phi.subtract(BigInteger.ONE)); //Makes sure D is positive
+            temp = Helper.EEA(this.e, this.phi);
+        } while(temp[1].compareTo(BigInteger.ZERO) < 0);
+        this.d = temp[1];
         this.publicKey[0] = this.n;
         this.publicKey[1] = this.e;
-        this.privateKey = n;
+        this.privateKey = this.d;
     }
 
     public void print(){
@@ -45,9 +44,28 @@ public class RSA {
         System.out.println("D: "+this.d);
     }
 
+    public String encryptBlock(String message){
+        // implement conversion of message to number
+        //Message needs to be between 0, n-1.
+        BigInteger messageNum = new BigInteger(message);
+        BigInteger cipher = Helper.modularExpo(messageNum, this.publicKey[1], this.publicKey[0]);
+        return cipher.toString(10);
+    }
+
+    public String decryptBlock(String cipher){
+        BigInteger message = Helper.modularExpo(new BigInteger(cipher), this.privateKey, this.publicKey[0]);
+
+        return message.toString(10);
+    }
+
 
     public static void main(String[] args) {
         RSA test = new RSA();
-        test.print();
+        String cipher = test.encryptBlock("12345");
+        String message = test.decryptBlock(cipher);
+        System.out.println(cipher);
+        System.out.println(message);
+
+
     }
 }
