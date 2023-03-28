@@ -469,7 +469,7 @@ public class AES {
             ciphers.add(currentCipher);
         }
 
-        
+
         str = new StringBuilder();
         for(int i = 0; i < ciphers.size(); i++){
             String cipherCurrent = ArrayToString(ciphers.get(i));
@@ -512,7 +512,8 @@ public class AES {
         }
         Files.write(Paths.get(filePath3), newB);
 
-   
+        //AES ENCRYPT THE FILE
+        //AES ENCRYPT THE FILE NAME
 
 
     }
