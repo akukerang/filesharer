@@ -78,20 +78,6 @@ public class AES {
 
     }
 
-    public static void bytesToHexBlock(byte[] input) {
-
-        // String[][][] ex = new String[4][4];
-        // int k = 0;
-        // for(int i = 0; i < 4; i++){
-        //     for (int j = 0; j < 4; j++){
-        //         hex[i][j] = String.format("%02X", input[k]);
-        //         k++;
-        //     }
-        // } 
-        // return hex;
-    }
-    
-
     public String[][] subBytes(String[][] block){
         String[][] subBytes = new String[4][4];
         int x, y;
@@ -431,6 +417,72 @@ public class AES {
         return str.toString();
     }
 
+    public static String FileToBlocks(byte[] bytes){
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String val = Integer.toHexString(bytes[i] & 0xFF);
+            if(val.length() == 1){
+                val = "0" + val;
+            }
+            str.append(val);
+        }
+        return str.toString();
+    }
+
+    public ArrayList<String[][]> encryptFile(byte[] bytes){
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String val = Integer.toHexString(bytes[i] & 0xFF);
+            if(val.length() == 1){
+                val = "0" + val;
+            }
+            str.append(val);
+        }
+        String blocks = "0".repeat(32 -(str.toString().length() % 32)) + str.toString();
+        ArrayList<String[][]> ciphers = new ArrayList<String[][]>();
+        for(int i = 0; i < blocks.length(); i+=32){
+            String[][] current = StringTo2dArray(blocks.substring(i, i+32));
+            String[][] currentCipher = this.encryptBlock(current);
+            ciphers.add(currentCipher);
+        }
+        return ciphers;
+    }
+
+    public String decryptFile(ArrayList<String[][]> ciphers){
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i < ciphers.size(); i++){
+            String decryptCurrent = ArrayToString(this.decryptBlock(ciphers.get(i)));
+            str.append(decryptCurrent);
+        }
+        String removePadding = str.toString();
+        while(removePadding.substring(0,2).equals("00")){
+            removePadding = removePadding.substring(2);
+        }
+        return removePadding;
+    }
+
+    public static byte[] toByteArray(String str){
+        byte[] bytes = new byte[str.length() / 2];
+        for(int i = 0; i < str.length(); i+=2){
+            String current = str.substring(i, i+2);
+            int currentVal = Integer.parseInt(current, 16);
+            if(currentVal >= 128){
+                currentVal -= 256;
+            }
+            bytes[i/2] = (byte) currentVal;
+        }
+        return bytes;
+    }
+
+    public static byte[] toByteArray(ArrayList<String[][]> message){
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i < message.size(); i++){
+            String cipherCurrent = ArrayToString(message.get(i));
+            str.append(cipherCurrent);
+        }
+        return toByteArray(str.toString());
+    }
+
     public static void main(String[] args) throws IOException{
         String inputKey = "000102030405060708090a0b0c0d0e0f";
         StringBuilder str = new StringBuilder();
@@ -440,77 +492,33 @@ public class AES {
             temp = "0".repeat(8-temp.length()) + temp;
             str.append(temp);   
         }
-        String key = str.toString();
-
-
-     
-        String filePath = "F:\\repos\\Filesharer\\src\\files\\pomu.jpg";
-        String filePath2 = "F:\\repos\\Filesharer\\src\\files\\encrypted.jpg";
-        String filePath3 = "F:\\repos\\Filesharer\\src\\files\\pomuDecrypt.jpg";
-
-        byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-        str = new StringBuilder();
-
-        for (int i = 0; i < bytes.length; i++) {
-            String val = Integer.toHexString(bytes[i] & 0xFF);
-            if(val.length() == 1){
-                val = "0" + val;
-            }
-            str.append(val);
-        }
-        String hex = str.toString();
-        String padded = "0".repeat(32 -(hex.length() % 32)) + hex;
-
-        AES a = new AES(key);
-        ArrayList<String[][]> ciphers = new ArrayList<String[][]>();
-        for(int i = 0; i < padded.length(); i+=32){
-            String[][] current = StringTo2dArray(padded.substring(i, i+32));
-            String[][] currentCipher = a.encryptBlock(current);
-            ciphers.add(currentCipher);
-        }
-
-
-        str = new StringBuilder();
-        for(int i = 0; i < ciphers.size(); i++){
-            String cipherCurrent = ArrayToString(ciphers.get(i));
-            str.append(cipherCurrent);
-        }
-        String encrypted = str.toString();
-        byte[] encryptedBytes = new byte[encrypted.length() / 2];
-        for(int i = 0; i < encrypted.length(); i+=2){
-            String current = encrypted.substring(i, i+2);
-            int currentVal = Integer.parseInt(current, 16);
-            if(currentVal >= 128){
-                currentVal -= 256;
-            }
-            encryptedBytes[i/2] = (byte) currentVal;
-        }
-        Files.write(Paths.get(filePath2), encryptedBytes);
 
 
 
 
 
-        str = new StringBuilder();
-        for(int i = 0; i < ciphers.size(); i++){
-            String decryptCurrent = ArrayToString(a.decryptBlock(ciphers.get(i)));
-            str.append(decryptCurrent);
-        }
-        String newHex = str.toString();
-        while(newHex.substring(0,2).equals("00")){
-            newHex = newHex.substring(2);
-        }
 
-        byte[] newB = new byte[newHex.length() / 2];
-        for(int i = 0; i < newHex.length(); i+=2){
-            String current = newHex.substring(i, i+2);
-            int currentVal = Integer.parseInt(current, 16);
-            if(currentVal >= 128){
-                currentVal -= 256;
-            }
-            newB[i/2] = (byte) currentVal;
-        }
-        Files.write(Paths.get(filePath3), newB);
+
+
+        
+
+        // Files.write(Paths.get(filePath2), encryptedBytes);
+
+
+
+
+
+
+        // byte[] newB = new byte[newHex.length() / 2];
+        // for(int i = 0; i < newHex.length(); i+=2){
+        //     String current = newHex.substring(i, i+2);
+        //     int currentVal = Integer.parseInt(current, 16);
+        //     if(currentVal >= 128){
+        //         currentVal -= 256;
+        //     }
+        //     newB[i/2] = (byte) currentVal;
+        // }
+        // Files.write(Paths.get(filePath3), newB);
 
         //AES ENCRYPT THE FILE
         //AES ENCRYPT THE FILE NAME
