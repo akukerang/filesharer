@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import encryption.AES;
+import encryption.Helper;
 public class UploadFile extends JFrame implements ActionListener {
     private JButton browseButton = new JButton("Browse");
     AES a = new AES("10000001000000011000001000000010100000110000001110000100000001001000010100000101100001100000011010000111000001111");
@@ -42,8 +43,8 @@ public class UploadFile extends JFrame implements ActionListener {
 
                     ArrayList<String[][]> ciphers = a.encryptFile(bytes);
                     String decrypt = a.decryptFile(ciphers);
-                    byte[] encryptedBytes = AES.toByteArray(ciphers);
-                    byte[] decryptedBytes = AES.toByteArray(decrypt);
+                    byte[] encryptedBytes = Helper.toByteArray(ciphers);
+                    byte[] decryptedBytes = Helper.toByteArray(decrypt);
 
 
                     String fileName = selectedFile.getName();
