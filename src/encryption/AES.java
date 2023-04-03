@@ -314,7 +314,7 @@ public class AES {
         return decrypt;
     }
 
-    public ArrayList<String[][]> encryptFile(byte[] bytes){
+    public byte[] encryptFile(byte[] bytes){
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {
             String val = Integer.toHexString(bytes[i] & 0xFF);
@@ -330,20 +330,32 @@ public class AES {
             String[][] currentCipher = this.encryptBlock(current);
             ciphers.add(currentCipher);
         }
-        return ciphers;
+        return Helper.toByteArray(ciphers);
     }
 
-    public String decryptFile(ArrayList<String[][]> ciphers){
+    public byte[] decryptFile(byte[] ciphers){
         StringBuilder str = new StringBuilder();
-        for(int i = 0; i < ciphers.size(); i++){
-            String decryptCurrent = Helper.ArrayToString(this.decryptBlock(ciphers.get(i)));
+        for (int i = 0; i < ciphers.length; i++) {
+            String val = Integer.toHexString(ciphers[i] & 0xFF);
+            if(val.length() == 1){
+                val = "0" + val;
+            }
+            str.append(val);
+        }
+        String cipherString = str.toString();
+        str = new StringBuilder();
+        for(int i = 0; i < cipherString.length(); i+=32){
+            String decryptCurrent = Helper.ArrayToString(
+                this.decryptBlock(Helper.StringTo2dArray(cipherString.substring(i, i+32)))
+            );
             str.append(decryptCurrent);
         }
+
         String removePadding = str.toString();
         while(removePadding.substring(0,2).equals("00")){
             removePadding = removePadding.substring(2);
         }
-        return removePadding;
+        return Helper.toByteArray(removePadding);
     }
 
 }

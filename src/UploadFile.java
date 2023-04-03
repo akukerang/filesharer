@@ -5,6 +5,14 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.ResultSet;
+
+
 
 import encryption.AES;
 import encryption.Helper;
@@ -41,21 +49,54 @@ public class UploadFile extends JFrame implements ActionListener {
                 try(FileInputStream fis = new FileInputStream(selectedFile)) {
                     fis.read(bytes);
 
-                    ArrayList<String[][]> ciphers = a.encryptFile(bytes);
-                    String decrypt = a.decryptFile(ciphers);
-                    byte[] encryptedBytes = Helper.toByteArray(ciphers);
-                    byte[] decryptedBytes = Helper.toByteArray(decrypt);
-
-
+    
+                    byte[] encryptedBytes = a.encryptFile(bytes);
                     String fileName = selectedFile.getName();
                     String parent = selectedFile.getParent();
+                    try {
+                        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/files?" +
+                        "user=root&password=password");
+                        String sql = "INSERT INTO files (filename, filedata) VALUES (?, ?)";
+                        PreparedStatement statement = conn.prepareStatement(sql);
+                        statement.setString(1, fileName);
+                        statement.setBytes(2, encryptedBytes);
+                        // int rowsInserted = statement.executeUpdate();
+                        // if (rowsInserted > 0) {
+                        //     System.out.println("File data inserted successfully");
+                        // }                        
+                        
+                        sql = "SELECT * FROM files WHERE id = 1";
+                        Statement stmt = conn.createStatement();
+                        ResultSet rs = stmt.executeQuery(sql);
+                        if(rs.next()){
+                            String outputFilename = rs.getString("filename");
+                            byte[] fileData = rs.getBytes("fileData");
+
+                            byte[] decryptedBytes = a.decryptFile(fileData);
+
+                            System.out.println(fileData.length);
+                            System.out.println(encryptedBytes.length);
+
+                            Files.write(Paths.get(parent+"\\encrypted"), fileData);                         
+                            Files.write(Paths.get(parent+"\\"+outputFilename+"_decrypted.png"), decryptedBytes);
+                        }
+
+
+
+
+
+                        statement.close();
+
+                        stmt.close();
+                        conn.close();
+                    } catch (SQLException sqlE){
+                        System.out.println(sqlE.getMessage());
+                    }
+ 
+
+
+
                     System.out.println(parent+"test");
-                    Files.write(Paths.get(parent+"\\encryped"), encryptedBytes);
-                    Files.write(Paths.get(parent+"\\"+fileName+"_decrypted.png"), decryptedBytes);
-
-
-
-
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, "Error reading file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
