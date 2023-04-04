@@ -1,12 +1,21 @@
 package GUI;
 
 import javax.swing.JButton;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 public class Login extends JFrame implements ActionListener{
+    private static String URL = "jdbc:mysql://localhost/files?" +
+    "user=root&password=password";
     JLabel loginLabel = new JLabel("Login");
     JLabel createLabel = new JLabel("Create Account");
     JLabel usernameLabel = new JLabel("Username");
@@ -101,9 +110,20 @@ public class Login extends JFrame implements ActionListener{
         return input.matches(validCharsRegex);
     }
 
-    public static boolean userExist(String username){
-        // have an sql statement that checks if username already in table
-        
+    public static boolean userExist(String username) throws SQLException{
+        //checks if username already exists in the table
+        Connection conn = DriverManager.getConnection(URL);
+        String sql = "SELECT COUNT(*) FROM users WHERE userName="+username;
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        int count = rs.getInt(1);
+        stmt.close();
+        rs.close();
+        conn.close();
+        if(count == 0){
+            return true;
+        }
         return false;
     }
 
@@ -125,6 +145,7 @@ public class Login extends JFrame implements ActionListener{
                 System.out.println("Password: " + passwordData);
                 // hash password
                 // check if password matches SQL
+                    // make function
                 // SELECT * FROM users WHERE username=userNameData
                 // if hash(passwordData) matches SQL return, login, else error message
 
@@ -159,14 +180,18 @@ public class Login extends JFrame implements ActionListener{
                 errorMessage2.setText("Passwords do not match");
             } 
             else {
-                if(userExist(usernameData2)){
-                    errorMessage2.setText("User already exists");
-                    errorMessage2.setVisible(true);
-                } else {
-                    errorMessage2.setVisible(false);
-                    System.out.println("Username: " + usernameData2);
-                    System.out.println("Password: " + passwordData2);
-                    System.out.println("Confirm: " + confirmData);
+                try {
+                    if(userExist(usernameData2)){
+                        errorMessage2.setText("User already exists");
+                        errorMessage2.setVisible(true);
+                    } else {
+                        errorMessage2.setVisible(false);
+                        System.out.println("Username: " + usernameData2);
+                        System.out.println("Password: " + passwordData2);
+                        System.out.println("Confirm: " + confirmData);
+                    }
+                } catch (SQLException e1) {
+                    System.out.println(e1.getMessage());
                 }
 
             }

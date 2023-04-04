@@ -11,10 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
-
-
-
 import encryption.AES;
+
 public class UploadFile extends JFrame implements ActionListener {
     private JButton browseButton = new JButton("Browse");
     AES a = new AES("10000001000000011000001000000010100000110000001110000100000001001000010100000101100001100000011010000111000001111");
