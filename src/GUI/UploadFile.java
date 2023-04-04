@@ -1,10 +1,10 @@
+package GUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 
 
 import encryption.AES;
-import encryption.Helper;
 public class UploadFile extends JFrame implements ActionListener {
     private JButton browseButton = new JButton("Browse");
     AES a = new AES("10000001000000011000001000000010100000110000001110000100000001001000010100000101100001100000011010000111000001111");
@@ -23,22 +22,16 @@ public class UploadFile extends JFrame implements ActionListener {
         super("Upload File");
         setSize(500, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new FlowLayout());
         topPanel.add(browseButton);
         panel.add(topPanel, BorderLayout.NORTH);
-
-
         browseButton.addActionListener(this);
-
         setContentPane(panel);
         setVisible(true);
     }
-
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == browseButton) {
             JFileChooser fileChooser = new JFileChooser("F:/repos/Filesharer/src/files");
@@ -48,8 +41,6 @@ public class UploadFile extends JFrame implements ActionListener {
                 byte[] bytes = new byte[(int) selectedFile.length()];
                 try(FileInputStream fis = new FileInputStream(selectedFile)) {
                     fis.read(bytes);
-
-    
                     byte[] encryptedBytes = a.encryptFile(bytes);
                     String fileName = selectedFile.getName();
                     String parent = selectedFile.getParent();
@@ -71,32 +62,17 @@ public class UploadFile extends JFrame implements ActionListener {
                         if(rs.next()){
                             String outputFilename = rs.getString("filename");
                             byte[] fileData = rs.getBytes("fileData");
-
                             byte[] decryptedBytes = a.decryptFile(fileData);
-
-                            System.out.println(fileData.length);
-                            System.out.println(encryptedBytes.length);
-
                             Files.write(Paths.get(parent+"\\encrypted"), fileData);                         
                             Files.write(Paths.get(parent+"\\"+outputFilename+"_decrypted.png"), decryptedBytes);
                         }
-
-
-
-
-
                         statement.close();
-
                         stmt.close();
                         conn.close();
                     } catch (SQLException sqlE){
                         System.out.println(sqlE.getMessage());
                     }
- 
 
-
-
-                    System.out.println(parent+"test");
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, "Error reading file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
