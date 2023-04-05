@@ -9,9 +9,12 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
+
+import encryption.Hash;
 
 public class Login extends JFrame implements ActionListener{
     private static String URL = "jdbc:mysql://localhost/files?" +
@@ -113,20 +116,30 @@ public class Login extends JFrame implements ActionListener{
     public static boolean userExist(String username) throws SQLException{
         //checks if username already exists in the table
         Connection conn = DriverManager.getConnection(URL);
-        String sql = "SELECT COUNT(*) FROM users WHERE userName="+username;
-        Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
+        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE userName= ?");
+        stmt.setString(1, username);
+        ResultSet rs = stmt.executeQuery();
         rs.next();
         int count = rs.getInt(1);
         stmt.close();
         rs.close();
         conn.close();
         if(count == 0){
-            return true;
-        }
-        return false;
+            return false;
+        } //if count anything other than 0, user Exists
+        return true;
     }
 
+    public static void newUser(String username, String hash) throws SQLException{
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (username, passwordHash) VALUES (?, ?)");
+        stmt.setString(1, username);
+        stmt.setString(2, hash);
+        stmt.executeUpdate();
+        stmt.close();
+        conn.close();
+
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -160,7 +173,7 @@ public class Login extends JFrame implements ActionListener{
             String usernameData2 = username2.getText();
             String passwordData2 = new String(password2.getPassword());
             String confirmData = new String(confirmPassword.getPassword());
-
+            String passwordHash = Hash.HashMessage(passwordData2);
             System.out.println("submit");
             if(usernameData2.trim().isEmpty() 
             || passwordData2.trim().isEmpty()
@@ -186,9 +199,7 @@ public class Login extends JFrame implements ActionListener{
                         errorMessage2.setVisible(true);
                     } else {
                         errorMessage2.setVisible(false);
-                        System.out.println("Username: " + usernameData2);
-                        System.out.println("Password: " + passwordData2);
-                        System.out.println("Confirm: " + confirmData);
+                        newUser(usernameData2, passwordHash);
                     }
                 } catch (SQLException e1) {
                     System.out.println(e1.getMessage());

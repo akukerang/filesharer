@@ -3,6 +3,18 @@ package encryption;
 public class Hash {
     static String IV = "a65bf65d2b18a5b48fcdff8df54796d6";
     
+    private static String binaryToHexString(String binary, int bitSize){
+        StringBuilder str = new StringBuilder();
+        String temp;
+        for(int i = 0; i < bitSize; i+=4){
+            temp = Integer.toHexString(
+                Integer.parseInt(binary.substring(i,i+4),2)
+                );
+            str.append(temp);
+        }
+        return str.toString();
+    }
+
 
     private static String[] pad(String message){ //plaintext -> Array of 128-bit hexadecimal
         StringBuilder str = new StringBuilder();
@@ -31,28 +43,25 @@ public class Hash {
         // H2 = E_x1 (H1) xor H1
 
         a = new AES(Helper.hexToBinaryString(blocks[0],8));
-        
         String[][] encrypted = a.encryptBlock(Helper.StringTo2dArray(IV)); // Encryption output String[][] of hex
-
         String temp = Helper.hexToBinaryString(encrypted, 8); // converts to binary
-
         String xor = Helper.xor(temp, Helper.hexToBinaryString(IV, 8), 128); //xor h_i-1 with E(h_i-1)
-
-        String[][] prev = Helper.StringTo2dArray(xor); //converts back to 2d array, also storing previous H
-
+        String prev = binaryToHexString(xor, 128); //converts back to 2d array, also storing previous H
         for(int i = 1; i < blocks.length; i++){
             a = new AES(Helper.hexToBinaryString(blocks[i],8));
-
-            encrypted = a.encryptBlock(prev);
-
+            String[][] prevBlocks = Helper.StringTo2dArray(prev);
+            encrypted = a.encryptBlock(prevBlocks);
             temp = Helper.hexToBinaryString(encrypted, 8); // converts to binary
-
             xor = Helper.xor(temp, Helper.hexToBinaryString(prev, 8), 128); //xor h_i-1 with E(h_i-1)
+            prev = binaryToHexString(xor, 128); //converts back to 2d array, also storing previous H
 
-            prev = Helper.binaryToHex(xor); //converts back to 2d array
-  
         }
-        return Helper.ArrayToString(prev);
+        return prev;
     }
+
+    public static void main(String[] args) {
+        System.out.println(HashMessage("testdlkdaslk;l;asdk;slal"));
+    }
+    
 
 }
