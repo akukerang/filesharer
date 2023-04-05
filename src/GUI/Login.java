@@ -2,6 +2,8 @@ package GUI;
 
 import javax.swing.JButton;
 
+import com.mysql.cj.jdbc.Driver;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,7 +13,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
 
 import encryption.Hash;
@@ -41,8 +42,6 @@ public class Login extends JFrame implements ActionListener{
     JPanel loginPanel = new JPanel(new GridBagLayout());
     JPanel createPanel = new JPanel(new GridBagLayout());
 
-
-    JLabel temp = new JLabel("temp");
 
     public Login(){
         super("File Sharer");
@@ -141,6 +140,22 @@ public class Login extends JFrame implements ActionListener{
 
     }
 
+    public static boolean checkPassword(String username, String password) throws SQLException{
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM USERS WHERE USERNAME = ?");
+        stmt.setString(1, username);
+        ResultSet rs = stmt.executeQuery();
+ 
+        if(rs.next()){
+            String returnHash = rs.getString("passwordHash"); 
+            if(returnHash.equals(password)){ //if password hash matches database hash return true
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == loginButton){
@@ -153,15 +168,21 @@ public class Login extends JFrame implements ActionListener{
                 errorMessage.setVisible(true);
                 errorMessage.setText("Invalid Characthers");
             } else {
-                errorMessage.setVisible(false);
-                System.out.println("Username: " + usernameData);
-                System.out.println("Password: " + passwordData);
-                // hash password
-                // check if password matches SQL
-                    // make function
-                // SELECT * FROM users WHERE username=userNameData
-                // if hash(passwordData) matches SQL return, login, else error message
+                String passwordHash = Hash.HashMessage(passwordData);
+                try {
+                    if(!checkPassword(usernameData, passwordHash)){
+                        errorMessage.setText("Wrong username or password");
+                        errorMessage.setVisible(true);
+                    } else {
+                        System.out.println("Successful Login");
+                        errorMessage.setVisible(false);
+                        this.setVisible(false);
+                        // Should open home frame here
 
+                    }
+                } catch (SQLException e2){
+                    System.out.println(e2.getMessage());
+                }
             }
         } else if(e.getSource() == createAccountButton){
             this.setContentPane(createPanel);
