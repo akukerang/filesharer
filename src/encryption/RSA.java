@@ -19,10 +19,6 @@ public class RSA {
         this.publicKey[0] = new BigInteger(split[0]);
         this.publicKey[1] = new BigInteger(split[1]);
     }
-    
-    public RSA(String privateKey){
-        this.privateKey = new BigInteger(privateKey);
-    }
 
     public RSA(String[] publicKey){
         this.publicKey[0] = new BigInteger(publicKey[0]);
