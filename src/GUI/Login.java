@@ -7,6 +7,7 @@ import com.mysql.cj.jdbc.Driver;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigInteger;
 
 import javax.swing.*;
 import java.sql.Connection;
@@ -16,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import encryption.Hash;
+import encryption.Keys;
+import encryption.RSA;
 
 public class Login extends JFrame implements ActionListener{
     private static String URL = "jdbc:mysql://localhost/files?" +
@@ -132,9 +135,14 @@ public class Login extends JFrame implements ActionListener{
 
     public static void newUser(String username, String hash) throws SQLException{
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (username, passwordHash) VALUES (?, ?)");
+        Keys key = RSA.generateKeys();
+        String publicKey = key.publicKey;
+        String privateKey = key.privateKey;
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (username, passwordHash, publickey, privatekey) VALUES (?, ?, ?, ?)");
         stmt.setString(1, username);
         stmt.setString(2, hash);
+        stmt.setString(3, publicKey);
+        stmt.setString(4, privateKey);
         stmt.executeUpdate();
         stmt.close();
         conn.close();

@@ -1,4 +1,5 @@
 package encryption;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 public class AES {
@@ -61,7 +62,9 @@ public class AES {
 
     String key;
     public AES(String key){
-        this.key = key;
+        String temp = new BigInteger(key,10).toString(2);
+        temp = "0".repeat(128 - temp.length()) + temp;
+        this.key = temp;
     }
 
     private String[][] subBytes(String[][] block){
@@ -358,6 +361,58 @@ public class AES {
         return Helper.toByteArray(removePadding);
     }
 
+    public String encryptString(String input){
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i < input.length(); i++){ // getting ascii hex values
+            int temp = (int) input.charAt(i);
+            str.append(Integer.toHexString(temp));
+        }
+        String hex = str.toString();
+        hex = "0".repeat(32 - hex.length() % 32)+hex; //padding to block
+        str = new StringBuilder();
+        for(int i = 0; i < hex.length(); i+=32){ // encrypting blocks
+            String[][] current = Helper.StringTo2dArray(hex.substring(i, i+32));
+            String[][] cipherCurrent = this.encryptBlock(current);
+            str.append(Helper.ArrayToString(cipherCurrent));
+        }
+        return str.toString();
+    }
+
+    public String decryptString(String cipher){
+        StringBuilder str = new StringBuilder();
+        for(int i = 0; i < cipher.length(); i+=32){
+            String[][] current = Helper.StringTo2dArray(cipher.substring(i, i+32));
+            String[][] decryptCurrent = this.decryptBlock(current);
+            str.append(Helper.ArrayToString(decryptCurrent));
+        }
+        String decryptedHex = str.toString();
+        while(decryptedHex.substring(0, 2).equals("00")){
+            decryptedHex = decryptedHex.substring(2);
+        }
+        str = new StringBuilder();
+        for(int i = 0; i < decryptedHex.length(); i+=2){
+            char c = (char) Integer.parseInt(decryptedHex.substring(i, i+2), 16);
+            str.append(c);
+        }
+        return str.toString();
+    }
+
+
+    public static void main(String[] args) {
+        AES a = new AES("328901");
+        String[][] message = Helper.StringTo2dArray("ffffffffffffffffffffffffffffffff");
+        String[][] cipher = a.encryptBlock(message);
+        String[][] decrypt = a.decryptBlock(cipher);
+    
+        String test = "gklfsdklsdfkjlsdfjkljklsdf.png";
+
+        
+        String cipher2 = a.encryptString(test);
+        String decrypt2 = a.decryptString(cipher2);
+        System.out.println(decrypt2);
+
+
+    }
 }
 
 

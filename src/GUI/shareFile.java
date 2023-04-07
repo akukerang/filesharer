@@ -1,10 +1,18 @@
 package GUI;
 
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,11 +20,18 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import encryption.RSA;
+import encryption.AES;
+import encryption.Helper;
+import Helper.FileReturn;
 public class shareFile extends JFrame implements ActionListener
 {
     private String username;
-    private Object[] selected;
+    private FileReturn selected;
     private JPanel main = new JPanel(new GridBagLayout());
+    private static String URL = "jdbc:mysql://localhost/files?" +
+    "user=root&password=password";
+
 
     JLabel title = new JLabel("Share file");
     JLabel recipientLabel = new JLabel("Recipient: ");
@@ -28,11 +43,13 @@ public class shareFile extends JFrame implements ActionListener
     JButton cancelButton = new JButton("Cancel");
 
 
-    public shareFile(String username, Object[] selected){
+    public shareFile(String username, FileReturn selected){
         super("Share Selected File");
         this.username = username;
         this.selected = selected;
-        setSize(400, 300);
+        title.setFont(new Font("Arial", Font.BOLD, 16));
+
+        setSize(300, 200);
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         cancelButton.addActionListener(this);
@@ -61,25 +78,54 @@ public class shareFile extends JFrame implements ActionListener
         setVisible(true);
     }
 
-    public void share(String recipient){
+    public void share(String recipient) throws SQLException{
+        // Select user key and encrypt
         // SQL Insert on shareFile Table
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement statement = conn.prepareStatement("SELECT PUBLICKEY FROM USERS WHERE USERNAME = ?");
+        statement.setString(1, recipient);
+        ResultSet rs = statement.executeQuery();
+        rs.next();
+        String[] recipPublic = rs.getString(1).split(" "); //Gets recipient public key
+        // Generates random key for AES
+        String masterKey = Helper.randomBigInt(new BigInteger("3"), new BigInteger("340282366920938463463374607431768211455")).toString(10);
+        // Encryption init
+        AES a = new AES(masterKey);
+        RSA r = new RSA(recipPublic);
 
+        
+        byte[] encryptedBytes = a.encryptFile(this.selected.data);
+        String encryptedName = a.encryptString(this.selected.name);
+        String encryptedKey = r.encryptBlock(masterKey);
+        System.out.println(encryptedKey.length());
+        statement = conn.prepareStatement("INSERT INTO SHARED (filename, filedata, sender, reciever, masterkey) VALUES (?, ?, ?, ?, ?)");
+        statement.setString(1, encryptedName);
+        statement.setBytes(2, encryptedBytes);
+        statement.setString(3, this.username);
+        statement.setString(4, recipient);
+        statement.setString(5, encryptedKey);
+        statement.executeUpdate();
+
+
+        statement.close();
+        rs.close();
+        conn.close();
     }
 
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == shareButton){
-            share(recipientField.getText());
-            response.setText("Successfully shared");
-            response.setVisible(true);
+            try{
+                share(recipientField.getText());
+                response.setText("Successfully shared");
+                response.setVisible(true);
+            } catch (SQLException eee){
+                System.out.println(eee.getMessage());
+            }
         } else {
             this.setVisible(false);
         }
     }
     
-    public static void main(String[] args) {
-        Object[] temp = {1,2,3};
-        new shareFile("akukerang2", temp);
-    }
 }

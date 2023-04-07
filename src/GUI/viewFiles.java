@@ -16,6 +16,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
+import Helper.FileReturn;
 
 public class viewFiles extends JFrame implements ActionListener
 {
@@ -121,9 +122,39 @@ public class viewFiles extends JFrame implements ActionListener
             // share, open popup window to share selected file
             // popup window should have two buttons cancel, confirm
             // and a textfield for the recipient's name
+            // new shareFile(this.username. this.selected);
+            int selectedRow = fileTable.getSelectedRow();
+            if(selectedRow != -1){
+                try {
+                    new shareFile(this.username, getRowData(selectedRow));
+                } catch (SQLException eee){
+                    System.out.println(eee.getMessage());
+                }
+             } else {
+                System.out.println("select");
+             }
+
+
+
         }
     }
     
+
+    public FileReturn getRowData(int selectedRow) throws SQLException{
+        String id = fileTable.getValueAt(selectedRow, 0).toString();
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement statement = conn.prepareStatement("SELECT filename, filedata FROM FILES WHERE ID = ?");
+        statement.setString(1, id);
+        ResultSet rs = statement.executeQuery();
+        rs.next();
+        FileReturn output = new FileReturn(rs.getString("filename"), rs.getBytes("filedata"));
+        conn.close();
+        rs.close();
+        statement.close();
+        return output;
+    }
+
+
 
     public static void uploadFile(File file, String filename, String username) throws SQLException{
         byte[] bytes = new byte[(int) file.length()];
@@ -168,7 +199,7 @@ public class viewFiles extends JFrame implements ActionListener
 
 
     public static void main(String[] args) {
-        new viewFiles("akukerang2");
+        new viewFiles("gabriel");
     }
 
 }
