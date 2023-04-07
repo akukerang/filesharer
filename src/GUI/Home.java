@@ -12,10 +12,10 @@ public class Home extends JFrame implements ActionListener{
     JPanel topPanel = new JPanel(new FlowLayout());
     
     JLabel titleLabel = new JLabel("File Sharer");
-    JButton uploadButton = new JButton("Upload a File");
-    JButton downloadButton = new JButton("View your Files");
-    JButton shareButton = new JButton("Share a file");
-    JButton viewButton = new JButton("View Shared Files");
+    JButton viewButton = new JButton("View Files");
+    JButton sharedFilesButton = new JButton("View Shared");
+    JButton profileButton = new JButton("Edit Profile");
+
     JPanel centerPanel = new JPanel(new GridLayout(4, 1));
 
     public Home(String username) {
@@ -28,15 +28,14 @@ public class Home extends JFrame implements ActionListener{
 
         topPanel.add(titleLabel);
 
-        centerPanel.add(uploadButton);
-        centerPanel.add(shareButton);
-        centerPanel.add(downloadButton);
+        
         centerPanel.add(viewButton);
+        centerPanel.add(sharedFilesButton);
+        centerPanel.add(profileButton);
 
-        uploadButton.addActionListener(this);
-        shareButton.addActionListener(this);
-        downloadButton.addActionListener(this);
         viewButton.addActionListener(this);
+        sharedFilesButton.addActionListener(this);
+        profileButton.addActionListener(this);
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -48,9 +47,15 @@ public class Home extends JFrame implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-       if(e.getSource() == uploadButton){
-            new UploadFile(this.username);
+       if(e.getSource() == viewButton){
+            new viewFiles(this.username);
             this.setVisible(false);
+       } else if (e.getSource() == sharedFilesButton){
+            //open shared files, similar to viewFiles but with shared file table
+       } else {
+            //open edit profile, can edit password and generate new keys
+            // 1 textfield, and buttons for cancel, confirm, generate new keys
+            // should user be able to see key values?
        }
     }
 

@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.Timestamp;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -97,6 +96,7 @@ public class viewFiles extends JFrame implements ActionListener
                 String fileName = selectedFile.getName();
                 try {
                     uploadFile(selectedFile, fileName, this.username);
+                    // updates table data
                     this.data = updateFileList(this.username);
                     DefaultTableModel model = new DefaultTableModel(this.data, columnNames);
                     this.fileTable.setModel(model);
@@ -107,11 +107,20 @@ public class viewFiles extends JFrame implements ActionListener
         } else if(e.getSource() == refreshButton){
             try {
                 this.data = updateFileList(this.username);
+                // updates table data
                 DefaultTableModel model = new DefaultTableModel(this.data, columnNames);
                 this.fileTable.setModel(model);
             } catch (SQLException err){
                 System.out.println(err.getMessage());
             }
+        } else if(e.getSource() == downloadButton){
+            // open a file dialog, with the selected file of the table
+        } else if(e.getSource() == deleteButton){
+            // delete selected entry, then refresh table
+        } else {
+            // share, open popup window to share selected file
+            // popup window should have two buttons cancel, confirm
+            // and a textfield for the recipient's name
         }
     }
     

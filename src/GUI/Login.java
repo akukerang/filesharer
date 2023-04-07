@@ -46,6 +46,7 @@ public class Login extends JFrame implements ActionListener{
     public Login(){
         super("File Sharer");
         setSize(300, 400);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(5, 0, 5, 0);
