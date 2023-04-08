@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,13 +25,13 @@ public class viewFiles extends JFrame implements ActionListener
     "user=root&password=password";
     private String username;
     private Object[][] data;
-
+    private FileReturn selectedFile;
 
 
     private JPanel mainPanel = new JPanel(new BorderLayout());
     private JPanel topPanel = new JPanel();
     private JPanel tablePanel = new JPanel();
-    private JPanel bottomPanel = new JPanel();
+    private JPanel bottomPanel = new JPanel(new GridBagLayout());
 
     JButton uploadButton = new JButton("Upload");
     JButton shareButton = new JButton("Share");
@@ -41,6 +42,7 @@ public class viewFiles extends JFrame implements ActionListener
     JLabel titleLabel = new JLabel("Your Files");
     JTable fileTable = new JTable();
     JScrollPane scrollPane = new JScrollPane();
+    JLabel errorMsg = new JLabel("");
 
     private static String[] columnNames = {"ID", "Name", "Date Created"};
     public viewFiles(String username){
@@ -68,16 +70,30 @@ public class viewFiles extends JFrame implements ActionListener
         deleteButton.addActionListener(this);
         refreshButton.addActionListener(this);
 
-        bottomPanel.add(uploadButton);
-        bottomPanel.add(shareButton);
-        bottomPanel.add(downloadButton);
-        bottomPanel.add(deleteButton);
-        bottomPanel.add(refreshButton);
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(10, 3, 10, 3);
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 5;
+        bottomPanel.add(errorMsg, c);
+        c.gridy++;
+        c.gridwidth = 1;
+        bottomPanel.add(uploadButton, c);
+        c.gridx++;
+        bottomPanel.add(shareButton, c);
+        c.gridx++;
+        bottomPanel.add(downloadButton, c);
+        c.gridx++;
+        bottomPanel.add(deleteButton, c);
+        c.gridx++;
+        bottomPanel.add(refreshButton, c);
+        errorMsg.setVisible(false);
+
 
         mainPanel.add(tablePanel, BorderLayout.CENTER);
         mainPanel.add(topPanel, BorderLayout.PAGE_START);
         mainPanel.add(bottomPanel, BorderLayout.PAGE_END);
-
+        
         
 
         setContentPane(mainPanel);
@@ -96,26 +112,56 @@ public class viewFiles extends JFrame implements ActionListener
                 File selectedFile = fileChooser.getSelectedFile();
                 String fileName = selectedFile.getName();
                 try {
+                    errorMsg.setVisible(false);
                     uploadFile(selectedFile, fileName, this.username);
                     // updates table data
                     this.data = updateFileList(this.username);
                     DefaultTableModel model = new DefaultTableModel(this.data, columnNames);
                     this.fileTable.setModel(model);
                 } catch (SQLException error){
-                    System.out.println(error.getMessage());
-                }
+                    errorMsg.setVisible(true);
+                    errorMsg.setText(error.getMessage());             
+               }
             }   
         } else if(e.getSource() == refreshButton){
             try {
+                errorMsg.setVisible(false);
                 this.data = updateFileList(this.username);
                 // updates table data
                 DefaultTableModel model = new DefaultTableModel(this.data, columnNames);
                 this.fileTable.setModel(model);
             } catch (SQLException err){
-                System.out.println(err.getMessage());
+                errorMsg.setVisible(true);
+                errorMsg.setText(err.getMessage());
             }
         } else if(e.getSource() == downloadButton){
             // open a file dialog, with the selected file of the table
+            int selectedRow = fileTable.getSelectedRow();
+            if (selectedRow != -1) {
+                errorMsg.setVisible(false);
+                try {
+                    this.selectedFile = getRowData(selectedRow);
+                    File selectedName = new File(this.selectedFile.name);
+                    JFileChooser fileChooser = new JFileChooser("F:/repos/Filesharer/src/files");
+                    fileChooser.setSelectedFile(selectedName);
+                    int result = fileChooser.showSaveDialog(this);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        File selected = fileChooser.getSelectedFile();
+                        try {
+                            FileOutputStream fileWriter = new FileOutputStream(selected);
+                            fileWriter.write(this.selectedFile.data);
+                            fileWriter.close();
+                        } catch (IOException err) {
+                            System.out.println();
+                        }
+                    }
+                } catch (SQLException eee) {
+                    System.out.println(eee.getMessage());
+                }
+            } else {
+                errorMsg.setVisible(true);
+                errorMsg.setText("Select a row");
+            }
         } else if(e.getSource() == deleteButton){
             // delete selected entry, then refresh table
         } else {
@@ -125,13 +171,15 @@ public class viewFiles extends JFrame implements ActionListener
             // new shareFile(this.username. this.selected);
             int selectedRow = fileTable.getSelectedRow();
             if(selectedRow != -1){
+                errorMsg.setVisible(false);
                 try {
                     new shareFile(this.username, getRowData(selectedRow));
                 } catch (SQLException eee){
                     System.out.println(eee.getMessage());
                 }
              } else {
-                System.out.println("select");
+                errorMsg.setVisible(true);
+                errorMsg.setText("Select a row");
              }
 
 
