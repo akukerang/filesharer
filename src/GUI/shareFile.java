@@ -21,8 +21,8 @@ import javax.swing.JTextField;
 
 import encryption.RSA;
 import encryption.AES;
-import encryption.Helper;
 import Helper.FileReturn;
+import Helper.Helper;
 public class shareFile extends JFrame implements ActionListener
 {
     private String username;
@@ -77,7 +77,7 @@ public class shareFile extends JFrame implements ActionListener
         setVisible(true);
     }
 
-    public void share(String recipient) throws SQLException{
+    private void share(String recipient) throws SQLException{
         // Select user key and encrypt
         // SQL Insert on shareFile Table
         Connection conn = DriverManager.getConnection(URL);
@@ -96,7 +96,6 @@ public class shareFile extends JFrame implements ActionListener
         byte[] encryptedBytes = a.encryptFile(this.selected.data);
         String encryptedName = a.encryptString(this.selected.name);
         String encryptedKey = r.encryptBlock(masterKey);
-        System.out.println(encryptedKey.length());
         statement = conn.prepareStatement("INSERT INTO SHARED (filename, filedata, sender, reciever, masterkey, datecreated) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
         statement.setString(1, encryptedName);
         statement.setBytes(2, encryptedBytes);

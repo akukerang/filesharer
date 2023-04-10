@@ -1,5 +1,7 @@
 package encryption;
 
+import Helper.Helper;
+
 public class Hash {
     static String IV = "a65bf65d2b18a5b48fcdff8df54796d6";
     

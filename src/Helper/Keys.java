@@ -1,4 +1,4 @@
-package encryption;
+package Helper;
 public class Keys{
     public String privateKey;
     public String publicKey;

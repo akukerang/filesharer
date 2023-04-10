@@ -212,7 +212,7 @@ public class viewFiles extends JFrame implements ActionListener
         conn.close();
     }
 
-    public FileReturn getRowData(int selectedRow) throws SQLException{
+    private FileReturn getRowData(int selectedRow) throws SQLException{
         String id = fileTable.getValueAt(selectedRow, 0).toString();
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn.prepareStatement("SELECT filename, filedata FROM FILES WHERE ID = ?");
@@ -228,7 +228,7 @@ public class viewFiles extends JFrame implements ActionListener
 
 
 
-    public static void uploadFile(File file, String filename, String username) throws SQLException{
+    private static void uploadFile(File file, String filename, String username) throws SQLException{
         byte[] bytes = new byte[(int) file.length()];
         try(FileInputStream fis = new FileInputStream(file)) {
             fis.read(bytes);
@@ -245,7 +245,7 @@ public class viewFiles extends JFrame implements ActionListener
         }
     }
 
-    public static Object[][] updateFileList(String username) throws SQLException{
+    private static Object[][] updateFileList(String username) throws SQLException{
         ArrayList<Object[]> files = new ArrayList<Object[]>();
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn.prepareStatement("SELECT id, filename, dateCreated FROM FILES WHERE USERNAME = ?");

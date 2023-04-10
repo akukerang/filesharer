@@ -2,6 +2,8 @@ package encryption;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import Helper.Helper;
+
 public class AES {
     static String[][] sBox = {
         {"63", 	"7c", 	"77", 	"7b", 	"f2", 	"6b", 	"6f", 	"c5", 	"30", 	"01", 	"67", 	"2b", 	"fe", 	"d7", 	"ab", 	"76"},
@@ -409,23 +411,6 @@ public class AES {
         }
         return str.toString();
     }
-
-
-    // public static void main(String[] args) {
-    //     AES a = new AES("328901");
-    //     String[][] message = Helper.StringTo2dArray("ffffffffffffffffffffffffffffffff");
-    //     String[][] cipher = a.encryptBlock(message);
-    //     String[][] decrypt = a.decryptBlock(cipher);
-    
-    //     String test = "gklfsdklsdfkjlsdfjkljklsdf.png";
-
-        
-    //     String cipher2 = a.encryptString(test);
-    //     String decrypt2 = a.decryptString(cipher2);
-    //     System.out.println(decrypt2);
-
-
-    // }
 }
 
 

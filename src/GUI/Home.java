@@ -57,22 +57,13 @@ public class Home extends JFrame implements ActionListener{
             //open shared files, similar to viewFiles but with shared file table
             new viewShared(this.username);
        } else if(e.getSource() == profileButton){
-            //open edit profile, can edit password and generate new keys
-            // 1 textfield, and buttons for cancel, confirm, generate new keys
-            // should user be able to see key values?
+            new editProfile(this.username);
        } else {
             //logout
             this.dispose();
             new Login();
        }
     }
-
-
-    public static void main(String[] args){
-        new Home("gabriel");
-    }
-
-
 
 
 }

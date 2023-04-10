@@ -1,11 +1,11 @@
-package encryption;
+package Helper;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Helper {
-    static BigInteger[] EEA(BigInteger a, BigInteger b){
+    public static BigInteger[] EEA(BigInteger a, BigInteger b){
         BigInteger[] output = new BigInteger[2];
         BigInteger temp = BigInteger.ZERO;
         BigInteger s = BigInteger.ZERO;

@@ -2,7 +2,8 @@ package GUI;
 
 import javax.swing.JButton;
 
-import com.mysql.cj.jdbc.Driver;
+
+import Helper.Keys;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import encryption.Hash;
-import encryption.Keys;
 import encryption.RSA;
 
 public class Login extends JFrame implements ActionListener{
@@ -202,7 +202,6 @@ public class Login extends JFrame implements ActionListener{
             String passwordData2 = new String(password2.getPassword());
             String confirmData = new String(confirmPassword.getPassword());
             String passwordHash = Hash.HashMessage(passwordData2);
-            System.out.println("submit");
             if(usernameData2.trim().isEmpty() 
             || passwordData2.trim().isEmpty()
             || confirmData.trim().isEmpty()

@@ -15,13 +15,12 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-import com.mysql.cj.jdbc.Driver;
 
 import java.awt.*;
 import Helper.FileReturn;
+import Helper.Keys;
 import encryption.AES;
 import encryption.RSA;
-import encryption.Keys;
 
 public class viewShared extends JFrame implements ActionListener {
     private static String URL = "jdbc:mysql://localhost/files?" +
@@ -162,7 +161,7 @@ public class viewShared extends JFrame implements ActionListener {
     }
 
 
-    public void deleteRow(int row) throws SQLException{
+    private void deleteRow(int row) throws SQLException{
         int id = Integer.parseInt(fileTable.getValueAt(row, 0).toString());
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement stmt = conn.prepareStatement("DELETE FROM SHARED WHERE ID = ?");
@@ -172,7 +171,7 @@ public class viewShared extends JFrame implements ActionListener {
         conn.close();
     }
 
-    public void getKeys() throws SQLException {
+    private void getKeys() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn
                 .prepareStatement("SELECT PUBLICKEY, PRIVATEKEY FROM USERS WHERE USERNAME = ?");
@@ -187,7 +186,7 @@ public class viewShared extends JFrame implements ActionListener {
         conn.close();
     }
 
-    public FileReturn getRowData(int selectedRow) throws SQLException {
+    private FileReturn getRowData(int selectedRow) throws SQLException {
         String id = fileTable.getValueAt(selectedRow, 0).toString();
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn
@@ -200,14 +199,13 @@ public class viewShared extends JFrame implements ActionListener {
         String decryptedName = a.decryptString(rs.getString("filename"));
         byte[] decryptedBytes = a.decryptFile(rs.getBytes("filedata"));
         FileReturn output = new FileReturn(decryptedName, decryptedBytes);
-        System.out.println(decryptedName);
         conn.close();
         rs.close();
         statement.close();
         return output;
     }
 
-    public static Object[][] updateFileList(String username, RSA r) throws SQLException {
+    private static Object[][] updateFileList(String username, RSA r) throws SQLException {
         ArrayList<Object[]> files = new ArrayList<Object[]>();
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn

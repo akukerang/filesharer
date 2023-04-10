@@ -16,9 +16,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+
+import Helper.Keys;
 import encryption.Hash;
-import encryption.Keys;
 import encryption.RSA;
 
 public class editProfile extends JFrame implements ActionListener {
