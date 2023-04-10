@@ -7,7 +7,6 @@ import com.mysql.cj.jdbc.Driver;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
 
 import javax.swing.*;
 import java.sql.Connection;
@@ -146,7 +145,6 @@ public class Login extends JFrame implements ActionListener{
         stmt.executeUpdate();
         stmt.close();
         conn.close();
-
     }
 
     public static boolean checkPassword(String username, String password) throws SQLException{
@@ -183,10 +181,10 @@ public class Login extends JFrame implements ActionListener{
                         errorMessage.setText("Wrong username or password");
                         errorMessage.setVisible(true);
                     } else {
-                        System.out.println("Successful Login");
                         errorMessage.setVisible(false);
-                        this.setVisible(false);
+                        this.dispose();
                         // Should open home frame here
+                        new Home(usernameData);
 
                     }
                 } catch (SQLException e2){
@@ -242,12 +240,5 @@ public class Login extends JFrame implements ActionListener{
 
 
     }
-
-    public static void main(String[] args) {
-        new Login();
-    }
-
-
-
 
 }

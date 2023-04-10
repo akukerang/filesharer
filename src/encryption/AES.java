@@ -66,6 +66,19 @@ public class AES {
         temp = "0".repeat(128 - temp.length()) + temp;
         this.key = temp;
     }
+    public AES(String key, int radii){
+        switch(radii){
+            case 2:
+                this.key = key;
+                break;
+            case 10:
+                String temp = new BigInteger(key,10).toString(2);
+                temp = "0".repeat(128 - temp.length()) + temp;
+                this.key = temp;
+                break;
+        } 
+    }
+
 
     private String[][] subBytes(String[][] block){
         String[][] subBytes = new String[4][4];
@@ -398,21 +411,21 @@ public class AES {
     }
 
 
-    public static void main(String[] args) {
-        AES a = new AES("328901");
-        String[][] message = Helper.StringTo2dArray("ffffffffffffffffffffffffffffffff");
-        String[][] cipher = a.encryptBlock(message);
-        String[][] decrypt = a.decryptBlock(cipher);
+    // public static void main(String[] args) {
+    //     AES a = new AES("328901");
+    //     String[][] message = Helper.StringTo2dArray("ffffffffffffffffffffffffffffffff");
+    //     String[][] cipher = a.encryptBlock(message);
+    //     String[][] decrypt = a.decryptBlock(cipher);
     
-        String test = "gklfsdklsdfkjlsdfjkljklsdf.png";
+    //     String test = "gklfsdklsdfkjlsdfjkljklsdf.png";
 
         
-        String cipher2 = a.encryptString(test);
-        String decrypt2 = a.decryptString(cipher2);
-        System.out.println(decrypt2);
+    //     String cipher2 = a.encryptString(test);
+    //     String decrypt2 = a.decryptString(cipher2);
+    //     System.out.println(decrypt2);
 
 
-    }
+    // }
 }
 
 

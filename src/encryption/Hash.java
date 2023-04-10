@@ -41,8 +41,7 @@ public class Hash {
         // H0 = IV
         // H1 = E_x0 (H0) xor H0
         // H2 = E_x1 (H1) xor H1
-
-        a = new AES(Helper.hexToBinaryString(blocks[0],8));
+        a = new AES(Helper.hexToBinaryString(blocks[0],8), 2);
         String[][] encrypted = a.encryptBlock(Helper.StringTo2dArray(IV)); // Encryption output String[][] of hex
         String temp = Helper.hexToBinaryString(encrypted, 8); // converts to binary
         String xor = Helper.xor(temp, Helper.hexToBinaryString(IV, 8), 128); //xor h_i-1 with E(h_i-1)
@@ -57,11 +56,6 @@ public class Hash {
 
         }
         return prev;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(HashMessage("testdlkdaslk;l;asdk;slal"));
-    }
-    
+    }    
 
 }

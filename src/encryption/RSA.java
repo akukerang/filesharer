@@ -60,18 +60,12 @@ public class RSA {
     }
 
 
-    public static void main(String[] args) {
-        Keys temp = generateKeys();
-
-
-
-        RSA test = new RSA(temp);
-        String cipher = test.encryptBlock("12345");
-        String message = test.decryptBlock(cipher);
-        System.out.println(cipher);
-        System.out.println(message);
-
-
-
-    }
+    // public static void main(String[] args) {
+    //     Keys temp = generateKeys();
+    //     RSA test = new RSA(temp);
+    //     String cipher = test.encryptBlock("12345");
+    //     String message = test.decryptBlock(cipher);
+    //     System.out.println(cipher);
+    //     System.out.println(message);
+    // }
 }

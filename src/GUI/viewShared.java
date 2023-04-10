@@ -3,9 +3,7 @@ package GUI;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -53,7 +51,7 @@ public class viewShared extends JFrame implements ActionListener {
     public viewShared(String username) {
         this.username = username;
         setSize(500, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         try {
             getKeys();
@@ -146,12 +144,32 @@ public class viewShared extends JFrame implements ActionListener {
             int selectedRow = fileTable.getSelectedRow();
             if (selectedRow != -1) {
                 errorMsg.setVisible(false);
-             
+                try{
+                    deleteRow(selectedRow);
+                    this.data = updateFileList(this.username, this.r);
+                    // updates table data
+                    DefaultTableModel model = new DefaultTableModel(this.data, columnNames);
+                    this.fileTable.setModel(model);
+                } catch (SQLException e3){
+                    errorMsg.setVisible(true);
+                    errorMsg.setText(e3.getMessage());   
+                }
             } else {
                 errorMsg.setVisible(true);
                 errorMsg.setText("Select a row");   
             }
         }
+    }
+
+
+    public void deleteRow(int row) throws SQLException{
+        int id = Integer.parseInt(fileTable.getValueAt(row, 0).toString());
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM SHARED WHERE ID = ?");
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
+        stmt.close();
+        conn.close();
     }
 
     public void getKeys() throws SQLException {
@@ -216,10 +234,6 @@ public class viewShared extends JFrame implements ActionListener {
         statement.close();
         conn.close();
         return output;
-    }
-
-    public static void main(String[] args) {
-        new viewShared("gabriel2");
     }
 
 }

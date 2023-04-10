@@ -48,7 +48,7 @@ public class viewFiles extends JFrame implements ActionListener
     public viewFiles(String username){
         this.username = username;
         setSize(500 , 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         try {
             this.data = updateFileList(this.username);
@@ -164,6 +164,24 @@ public class viewFiles extends JFrame implements ActionListener
             }
         } else if(e.getSource() == deleteButton){
             // delete selected entry, then refresh table
+            int selectedRow = fileTable.getSelectedRow();
+            if (selectedRow != -1) {
+                errorMsg.setVisible(false);
+                try{
+                    deleteRow(selectedRow);
+                    this.data = updateFileList(this.username);
+                    // updates table data
+                    DefaultTableModel model = new DefaultTableModel(this.data, columnNames);
+                    this.fileTable.setModel(model);
+                } catch (SQLException e3){
+                    errorMsg.setVisible(true);
+                    errorMsg.setText(e3.getMessage());   
+                }
+            } else {
+                errorMsg.setVisible(true);
+                errorMsg.setText("Select a row");   
+            }
+
         } else {
             // share, open popup window to share selected file
             // popup window should have two buttons cancel, confirm
@@ -181,12 +199,18 @@ public class viewFiles extends JFrame implements ActionListener
                 errorMsg.setVisible(true);
                 errorMsg.setText("Select a row");
              }
-
-
-
         }
     }
     
+    public void deleteRow(int row) throws SQLException{
+        int id = Integer.parseInt(fileTable.getValueAt(row, 0).toString());
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM FILES WHERE ID = ?");
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
+        stmt.close();
+        conn.close();
+    }
 
     public FileReturn getRowData(int selectedRow) throws SQLException{
         String id = fileTable.getValueAt(selectedRow, 0).toString();
@@ -243,11 +267,6 @@ public class viewFiles extends JFrame implements ActionListener
         statement.close();
         conn.close();
         return output;
-    }
-
-
-    public static void main(String[] args) {
-        new viewFiles("gabriel");
     }
 
 }

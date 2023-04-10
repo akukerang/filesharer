@@ -6,7 +6,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -51,7 +50,7 @@ public class shareFile extends JFrame implements ActionListener
 
         setSize(300, 200);
         setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         cancelButton.addActionListener(this);
         shareButton.addActionListener(this);
         GridBagConstraints c = new GridBagConstraints();
@@ -121,7 +120,8 @@ public class shareFile extends JFrame implements ActionListener
                 response.setText("Successfully shared");
                 response.setVisible(true);
             } catch (SQLException eee){
-                System.out.println(eee.getMessage());
+                response.setText("User not found");
+                response.setVisible(true);
             }
         } else {
             this.setVisible(false);
