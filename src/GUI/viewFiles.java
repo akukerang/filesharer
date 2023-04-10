@@ -106,7 +106,7 @@ public class viewFiles extends JFrame implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == uploadButton) {
-            JFileChooser fileChooser = new JFileChooser("F:/repos/Filesharer/src/files");
+            JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
@@ -142,7 +142,7 @@ public class viewFiles extends JFrame implements ActionListener
                 try {
                     this.selectedFile = getRowData(selectedRow);
                     File selectedName = new File(this.selectedFile.name);
-                    JFileChooser fileChooser = new JFileChooser("F:/repos/Filesharer/src/files");
+                    JFileChooser fileChooser = new JFileChooser();
                     fileChooser.setSelectedFile(selectedName);
                     int result = fileChooser.showSaveDialog(this);
                     if (result == JFileChooser.APPROVE_OPTION) {

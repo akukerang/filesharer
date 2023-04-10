@@ -118,7 +118,7 @@ public class viewShared extends JFrame implements ActionListener {
                 try {
                     this.selectedFile = getRowData(selectedRow);
                     File selectedName = new File(this.selectedFile.name);
-                    JFileChooser fileChooser = new JFileChooser("F:/repos/Filesharer/src/files");
+                    JFileChooser fileChooser = new JFileChooser();
                     fileChooser.setSelectedFile(selectedName);
                     int result = fileChooser.showSaveDialog(this);
                     if (result == JFileChooser.APPROVE_OPTION) {
