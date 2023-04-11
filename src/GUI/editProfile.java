@@ -22,8 +22,8 @@ import encryption.Hash;
 import encryption.RSA;
 
 public class editProfile extends JFrame implements ActionListener {
-    private static String URL = "jdbc:mysql://localhost/files?" +
-            "user=root&password=password";
+    private static String URL = "jdbc:mysql://localhost/FILES?" +
+    "user=debian-sys-maint&password=IX5LyMWQvBwY2pyF";
     private String username;
     JLabel confirmLabel = new JLabel("Enter current password");
     JLabel newLabel = new JLabel("Enter new password");
@@ -136,7 +136,7 @@ public class editProfile extends JFrame implements ActionListener {
         ResultSet rs = stmt.executeQuery();
 
         if (rs.next()) {
-            String returnHash = rs.getString("passwordHash");
+            String returnHash = rs.getString("PASSWORDHASH");
             if (returnHash.equals(password)) { // if password hash matches database hash return true
                 return true;
             }

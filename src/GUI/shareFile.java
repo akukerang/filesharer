@@ -28,8 +28,8 @@ public class shareFile extends JFrame implements ActionListener
     private String username;
     private FileReturn selected;
     private JPanel main = new JPanel(new GridBagLayout());
-    private static String URL = "jdbc:mysql://localhost/files?" +
-    "user=root&password=password";
+    private static String URL = "jdbc:mysql://localhost/FILES?" +
+    "user=debian-sys-maint&password=IX5LyMWQvBwY2pyF";
 
 
     JLabel title = new JLabel("Share file");
@@ -96,7 +96,7 @@ public class shareFile extends JFrame implements ActionListener
         byte[] encryptedBytes = a.encryptFile(this.selected.data);
         String encryptedName = a.encryptString(this.selected.name);
         String encryptedKey = r.encryptBlock(masterKey);
-        statement = conn.prepareStatement("INSERT INTO SHARED (filename, filedata, sender, reciever, masterkey, datecreated) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
+        statement = conn.prepareStatement("INSERT INTO SHARED (FILENAME, FILEDATA, SENDER, RECIEVER, MASTERKEY, DATECREATED) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
         statement.setString(1, encryptedName);
         statement.setBytes(2, encryptedBytes);
         statement.setString(3, this.username);

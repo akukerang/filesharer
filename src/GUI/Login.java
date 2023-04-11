@@ -20,8 +20,8 @@ import encryption.Hash;
 import encryption.RSA;
 
 public class Login extends JFrame implements ActionListener{
-    private static String URL = "jdbc:mysql://localhost/files?" +
-    "user=root&password=password";
+    private static String URL = "jdbc:mysql://localhost/FILES?" +
+    "user=debian-sys-maint&password=IX5LyMWQvBwY2pyF";
     JLabel loginLabel = new JLabel("Login");
     JLabel createLabel = new JLabel("Create Account");
     JLabel usernameLabel = new JLabel("Username");
@@ -118,7 +118,7 @@ public class Login extends JFrame implements ActionListener{
     public static boolean userExist(String username) throws SQLException{
         //checks if username already exists in the table
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE userName= ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM USERS WHERE USERNAME= ?");
         stmt.setString(1, username);
         ResultSet rs = stmt.executeQuery();
         rs.next();
@@ -137,7 +137,7 @@ public class Login extends JFrame implements ActionListener{
         Keys key = RSA.generateKeys();
         String publicKey = key.publicKey;
         String privateKey = key.privateKey;
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (username, passwordHash, publickey, privatekey) VALUES (?, ?, ?, ?)");
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (USERNAME, PASSWORDHASH, PUBLICKEY, PRIVATEKEY) VALUES (?, ?, ?, ?)");
         stmt.setString(1, username);
         stmt.setString(2, hash);
         stmt.setString(3, publicKey);
@@ -154,7 +154,7 @@ public class Login extends JFrame implements ActionListener{
         ResultSet rs = stmt.executeQuery();
  
         if(rs.next()){
-            String returnHash = rs.getString("passwordHash"); 
+            String returnHash = rs.getString("PASSWORDHASH"); 
             if(returnHash.equals(password)){ //if password hash matches database hash return true
                 return true;
             }

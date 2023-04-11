@@ -23,8 +23,8 @@ import encryption.AES;
 import encryption.RSA;
 
 public class viewShared extends JFrame implements ActionListener {
-    private static String URL = "jdbc:mysql://localhost/files?" +
-            "user=root&password=password";
+    private static String URL = "jdbc:mysql://localhost/FILES?" +
+    "user=debian-sys-maint&password=IX5LyMWQvBwY2pyF";
     private String username;
     private Object[][] data;
     private RSA r;
@@ -190,14 +190,14 @@ public class viewShared extends JFrame implements ActionListener {
         String id = fileTable.getValueAt(selectedRow, 0).toString();
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn
-                .prepareStatement("SELECT filename, filedata, masterkey FROM SHARED WHERE ID = ?");
+                .prepareStatement("SELECT FILENAME, FILEDATA, MASTERKEY FROM SHARED WHERE ID = ?");
         statement.setString(1, id);
         ResultSet rs = statement.executeQuery();
         rs.next();
-        String decryptKey = r.decryptBlock(rs.getString("masterkey"));
+        String decryptKey = r.decryptBlock(rs.getString("MASTERKEY"));
         AES a = new AES(decryptKey);
-        String decryptedName = a.decryptString(rs.getString("filename"));
-        byte[] decryptedBytes = a.decryptFile(rs.getBytes("filedata"));
+        String decryptedName = a.decryptString(rs.getString("FILENAME"));
+        byte[] decryptedBytes = a.decryptFile(rs.getBytes("FILEDATA"));
         FileReturn output = new FileReturn(decryptedName, decryptedBytes);
         conn.close();
         rs.close();
@@ -209,18 +209,18 @@ public class viewShared extends JFrame implements ActionListener {
         ArrayList<Object[]> files = new ArrayList<Object[]>();
         Connection conn = DriverManager.getConnection(URL);
         PreparedStatement statement = conn
-                .prepareStatement("SELECT id, filename, sender, datecreated, masterkey FROM SHARED WHERE RECIEVER = ?");
+                .prepareStatement("SELECT ID, FILENAME, SENDER, DATECREATED, MASTERKEY FROM SHARED WHERE RECIEVER = ?");
         statement.setString(1, username);
         ResultSet rs = statement.executeQuery();
         while (rs.next()) {
-            String decryptKey = r.decryptBlock(rs.getString("masterkey"));
+            String decryptKey = r.decryptBlock(rs.getString("MASTERKEY"));
             AES a = new AES(decryptKey);
             Object[] temp = new Object[4];
-            String encryptedFile = rs.getString("filename");
-            temp[0] = rs.getInt("id");
+            String encryptedFile = rs.getString("FILENAME");
+            temp[0] = rs.getInt("ID");
             temp[1] = a.decryptString(encryptedFile);
-            temp[2] = rs.getString("sender");
-            temp[3] = rs.getDate("datecreated");
+            temp[2] = rs.getString("SENDER");
+            temp[3] = rs.getDate("DATECREATED");
             files.add(temp);
         }
         Object[][] output = new Object[files.size()][3];

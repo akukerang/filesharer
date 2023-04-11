@@ -21,8 +21,8 @@ import Helper.FileReturn;
 
 public class viewFiles extends JFrame implements ActionListener
 {
-    private static String URL = "jdbc:mysql://localhost/files?" +
-    "user=root&password=password";
+    private static String URL = "jdbc:mysql://localhost/FILES?" +
+    "user=debian-sys-maint&password=IX5LyMWQvBwY2pyF";
     private String username;
     private Object[][] data;
     private FileReturn selectedFile;
@@ -215,11 +215,11 @@ public class viewFiles extends JFrame implements ActionListener
     private FileReturn getRowData(int selectedRow) throws SQLException{
         String id = fileTable.getValueAt(selectedRow, 0).toString();
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement statement = conn.prepareStatement("SELECT filename, filedata FROM FILES WHERE ID = ?");
+        PreparedStatement statement = conn.prepareStatement("SELECT FILENAME, FILEDATA FROM FILES WHERE ID = ?");
         statement.setString(1, id);
         ResultSet rs = statement.executeQuery();
         rs.next();
-        FileReturn output = new FileReturn(rs.getString("filename"), rs.getBytes("filedata"));
+        FileReturn output = new FileReturn(rs.getString("FILENAME"), rs.getBytes("FILEDATA"));
         conn.close();
         rs.close();
         statement.close();
@@ -233,7 +233,7 @@ public class viewFiles extends JFrame implements ActionListener
         try(FileInputStream fis = new FileInputStream(file)) {
             fis.read(bytes);
             Connection conn = DriverManager.getConnection(URL);
-            PreparedStatement statement = conn.prepareStatement("INSERT INTO files (filename, filedata, username, dateCreated) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
+            PreparedStatement statement = conn.prepareStatement("INSERT INTO FILES (FILENAME, FILEDATA, USERNAME, DATECREATED) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
             statement.setString(1, filename);
             statement.setBytes(2, bytes);
             statement.setString(3, username);
@@ -248,14 +248,14 @@ public class viewFiles extends JFrame implements ActionListener
     private static Object[][] updateFileList(String username) throws SQLException{
         ArrayList<Object[]> files = new ArrayList<Object[]>();
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement statement = conn.prepareStatement("SELECT id, filename, dateCreated FROM FILES WHERE USERNAME = ?");
+        PreparedStatement statement = conn.prepareStatement("SELECT ID, FILENAME, DATECREATED FROM FILES WHERE USERNAME = ?");
         statement.setString(1, username);
         ResultSet rs = statement.executeQuery();
         while(rs.next()){
             Object[] temp = new Object[3];
-            temp[0] = rs.getInt("id");
-            temp[1] = rs.getString("filename");
-            temp[2] = rs.getDate("datecreated");
+            temp[0] = rs.getInt("ID");
+            temp[1] = rs.getString("FILENAME");
+            temp[2] = rs.getDate("DATECREATED");
             files.add(temp);
         }
         Object[][] output = new Object[files.size()][3];
