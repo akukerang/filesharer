@@ -27,6 +27,7 @@ public class shareFile extends JFrame implements ActionListener
 {
     private String username;
     private FileReturn selected;
+    private AES a;
     private JPanel main = new JPanel(new GridBagLayout());
     private static String URL = "jdbc:mysql://localhost/files?" +
     "user=root&password=password";
@@ -42,10 +43,11 @@ public class shareFile extends JFrame implements ActionListener
     JButton cancelButton = new JButton("Cancel");
 
 
-    public shareFile(String username, FileReturn selected){
+    public shareFile(String username, FileReturn selected, AES a){
         super("Share Selected File");
         this.username = username;
         this.selected = selected;
+        this.a = a;
         title.setFont(new Font("Arial", Font.BOLD, 16));
 
         setSize(300, 200);
@@ -87,14 +89,14 @@ public class shareFile extends JFrame implements ActionListener
         rs.next();
         String[] recipPublic = rs.getString(1).split(" "); //Gets recipient public key
         // Generates random key for AES
-        String masterKey = Helper.randomBigInt(new BigInteger("3"), new BigInteger("340282366920938463463374607431768211455")).toString(10);
+        String masterKey = Helper.randomBigInt(new BigInteger("3"), new BigInteger("6277101735386680763835789423207666416102355444464034512896")).toString(10);
         // Encryption init
-        AES a = new AES(masterKey);
+        AES b = new AES(masterKey);
         RSA r = new RSA(recipPublic);
 
         
-        byte[] encryptedBytes = a.encryptFile(this.selected.data);
-        String encryptedName = a.encryptString(this.selected.name);
+        byte[] encryptedBytes = b.encryptFile(a.decryptFile(this.selected.data));
+        String encryptedName = b.encryptString(a.decryptString(this.selected.name));
         String encryptedKey = r.encryptBlock(masterKey);
         statement = conn.prepareStatement("INSERT INTO SHARED (filename, filedata, sender, reciever, masterkey, datecreated) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
         statement.setString(1, encryptedName);

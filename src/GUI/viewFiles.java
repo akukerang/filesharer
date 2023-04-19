@@ -18,6 +18,7 @@ import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
 import Helper.FileReturn;
+import encryption.AES;
 
 public class viewFiles extends JFrame implements ActionListener
 {
@@ -26,7 +27,7 @@ public class viewFiles extends JFrame implements ActionListener
     private String username;
     private Object[][] data;
     private FileReturn selectedFile;
-
+    private AES a;
 
     private JPanel mainPanel = new JPanel(new BorderLayout());
     private JPanel topPanel = new JPanel();
@@ -51,6 +52,7 @@ public class viewFiles extends JFrame implements ActionListener
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         try {
+            this.a = getKey(this.username);
             this.data = updateFileList(this.username);
             this.fileTable = new JTable(data, columnNames);
         } catch (SQLException e){
@@ -191,7 +193,7 @@ public class viewFiles extends JFrame implements ActionListener
             if(selectedRow != -1){
                 errorMsg.setVisible(false);
                 try {
-                    new shareFile(this.username, getRowData(selectedRow));
+                    new shareFile(this.username, getRowData(selectedRow), this.a);
                 } catch (SQLException eee){
                     System.out.println(eee.getMessage());
                 }
@@ -226,15 +228,15 @@ public class viewFiles extends JFrame implements ActionListener
         return output;
     }
 
-
-
-    private static void uploadFile(File file, String filename, String username) throws SQLException{
+    private void uploadFile(File file, String filename, String username) throws SQLException{
         byte[] bytes = new byte[(int) file.length()];
         try(FileInputStream fis = new FileInputStream(file)) {
             fis.read(bytes);
+            bytes = this.a.encryptFile(bytes);
+            String E_filename = this.a.encryptString(filename);
             Connection conn = DriverManager.getConnection(URL);
             PreparedStatement statement = conn.prepareStatement("INSERT INTO files (filename, filedata, username, dateCreated) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
-            statement.setString(1, filename);
+            statement.setString(1, E_filename);
             statement.setBytes(2, bytes);
             statement.setString(3, username);
             statement.executeUpdate();
@@ -245,17 +247,33 @@ public class viewFiles extends JFrame implements ActionListener
         }
     }
 
-    private static Object[][] updateFileList(String username) throws SQLException{
+    private static AES getKey(String username) throws SQLException{
+        Connection conn = DriverManager.getConnection(URL);
+        PreparedStatement statement = conn.prepareStatement("SELECT MASTERKEY FROM USERS WHERE USERNAME = ?");
+        statement.setString(1, username);
+        ResultSet rs = statement.executeQuery();
+        rs.next();
+        String masterKey = rs.getString("MASTERKEY");
+        conn.close();
+        statement.close();
+        rs.close();
+        return new AES(masterKey);
+    }
+
+
+
+    private Object[][] updateFileList(String username) throws SQLException{
         ArrayList<Object[]> files = new ArrayList<Object[]>();
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement statement = conn.prepareStatement("SELECT id, filename, dateCreated FROM FILES WHERE USERNAME = ?");
+
+        PreparedStatement statement = conn.prepareStatement("SELECT ID, FILENAME, DATECREATED FROM FILES WHERE USERNAME = ?");
         statement.setString(1, username);
         ResultSet rs = statement.executeQuery();
         while(rs.next()){
             Object[] temp = new Object[3];
-            temp[0] = rs.getInt("id");
-            temp[1] = rs.getString("filename");
-            temp[2] = rs.getDate("datecreated");
+            temp[0] = rs.getInt("ID");
+            temp[1] = this.a.decryptString(rs.getString("FILENAME"));       
+            temp[2] = rs.getDate("DATECREATED");
             files.add(temp);
         }
         Object[][] output = new Object[files.size()][3];
@@ -269,4 +287,7 @@ public class viewFiles extends JFrame implements ActionListener
         return output;
     }
 
+    public static void main(String[] args) {
+        new viewFiles("gabriel");
+    }
 }

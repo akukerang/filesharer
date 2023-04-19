@@ -2,12 +2,13 @@ package GUI;
 
 import javax.swing.JButton;
 
-
+import Helper.Helper;
 import Helper.Keys;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigInteger;
 
 import javax.swing.*;
 import java.sql.Connection;
@@ -137,11 +138,13 @@ public class Login extends JFrame implements ActionListener{
         Keys key = RSA.generateKeys();
         String publicKey = key.publicKey;
         String privateKey = key.privateKey;
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (username, passwordHash, publickey, privatekey) VALUES (?, ?, ?, ?)");
+        String masterKey = Helper.randomBigInt(new BigInteger("3"), new BigInteger("6277101735386680763835789423207666416102355444464034512896")).toString(10);
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO USERS (USERNAME, PASSWORDHASH, PUBLICKEY, PRIVATEKEY, MASTERKEY) VALUES (?, ?, ?, ?, ?)");
         stmt.setString(1, username);
         stmt.setString(2, hash);
         stmt.setString(3, publicKey);
         stmt.setString(4, privateKey);
+        stmt.setString(5, masterKey);
         stmt.executeUpdate();
         stmt.close();
         conn.close();

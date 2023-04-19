@@ -312,8 +312,6 @@ public class AES {
     public String[][] decryptBlock(String[][] block){
         String keys = keySchedule(this.key);
         String[][] decrypt = addRoundKey(block, keys.substring(1536, 1664));
-        System.out.println(new BigInteger(keys.substring(1536, 1664), 2).toString(16));
-        System.out.println("Round 0: " +Helper.ArrayToString(decrypt));
         for(int i = 11; i > 0; i--){
             //(Rounds based off key size)
             //Shift Row
