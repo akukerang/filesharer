@@ -98,7 +98,7 @@ public class shareFile extends JFrame implements ActionListener
         byte[] encryptedBytes = b.encryptFile(a.decryptFile(this.selected.data));
         String encryptedName = b.encryptString(a.decryptString(this.selected.name));
         String encryptedKey = r.encryptBlock(masterKey);
-        statement = conn.prepareStatement("INSERT INTO SHARED (filename, filedata, sender, reciever, masterkey, datecreated) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
+        statement = conn.prepareStatement("INSERT INTO SHARED (FILENAME, FILEDATA, SENDER, RECIEVER, MASTERKEY, DATECREATED) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
         statement.setString(1, encryptedName);
         statement.setBytes(2, encryptedBytes);
         statement.setString(3, this.username);

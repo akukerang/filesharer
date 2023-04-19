@@ -119,7 +119,7 @@ public class Login extends JFrame implements ActionListener{
     public static boolean userExist(String username) throws SQLException{
         //checks if username already exists in the table
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE userName= ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM USERS WHERE USERNAME= ?");
         stmt.setString(1, username);
         ResultSet rs = stmt.executeQuery();
         rs.next();
@@ -157,7 +157,7 @@ public class Login extends JFrame implements ActionListener{
         ResultSet rs = stmt.executeQuery();
  
         if(rs.next()){
-            String returnHash = rs.getString("passwordHash"); 
+            String returnHash = rs.getString("PASSWORDHASH"); 
             if(returnHash.equals(password)){ //if password hash matches database hash return true
                 return true;
             }

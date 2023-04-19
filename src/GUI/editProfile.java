@@ -136,7 +136,7 @@ public class editProfile extends JFrame implements ActionListener {
         ResultSet rs = stmt.executeQuery();
 
         if (rs.next()) {
-            String returnHash = rs.getString("passwordHash");
+            String returnHash = rs.getString("PASSWORDHASH");
             if (returnHash.equals(password)) { // if password hash matches database hash return true
                 return true;
             }

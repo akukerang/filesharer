@@ -217,11 +217,11 @@ public class viewFiles extends JFrame implements ActionListener
     private FileReturn getRowData(int selectedRow) throws SQLException{
         String id = fileTable.getValueAt(selectedRow, 0).toString();
         Connection conn = DriverManager.getConnection(URL);
-        PreparedStatement statement = conn.prepareStatement("SELECT filename, filedata FROM FILES WHERE ID = ?");
+        PreparedStatement statement = conn.prepareStatement("SELECT FILENAME, FILEDATA FROM FILES WHERE ID = ?");
         statement.setString(1, id);
         ResultSet rs = statement.executeQuery();
         rs.next();
-        FileReturn output = new FileReturn(rs.getString("filename"), rs.getBytes("filedata"));
+        FileReturn output = new FileReturn(rs.getString("FILENAME"), rs.getBytes("FILEDATA"));
         conn.close();
         rs.close();
         statement.close();
@@ -235,7 +235,7 @@ public class viewFiles extends JFrame implements ActionListener
             bytes = this.a.encryptFile(bytes);
             String E_filename = this.a.encryptString(filename);
             Connection conn = DriverManager.getConnection(URL);
-            PreparedStatement statement = conn.prepareStatement("INSERT INTO files (filename, filedata, username, dateCreated) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
+            PreparedStatement statement = conn.prepareStatement("INSERT INTO FILES (FILENAME, FILEDATA, USERNAME, DATECREATED) VALUES (?, ?, ?, CURRENT_TIMESTAMP)");
             statement.setString(1, E_filename);
             statement.setBytes(2, bytes);
             statement.setString(3, username);
@@ -285,9 +285,5 @@ public class viewFiles extends JFrame implements ActionListener
         statement.close();
         conn.close();
         return output;
-    }
-
-    public static void main(String[] args) {
-        new viewFiles("gabriel");
     }
 }
