@@ -65,7 +65,7 @@ public class AES {
     String key;
     public AES(String key){
         String temp = new BigInteger(key,10).toString(2);
-        temp = "0".repeat(128 - temp.length()) + temp;
+        temp = "0".repeat(192 - temp.length()) + temp;
         this.key = temp;
     }
     public AES(String key, int radii){
@@ -75,7 +75,7 @@ public class AES {
                 break;
             case 10:
                 String temp = new BigInteger(key,10).toString(2);
-                temp = "0".repeat(128 - temp.length()) + temp;
+                temp = "0".repeat(192 - temp.length()) + temp;
                 this.key = temp;
                 break;
         } 
@@ -248,19 +248,19 @@ public class AES {
         return addedBinary;
     }
 
-    private static String[] keySchedule(String key){ // Input binary, Output binary
+    private static String keySchedule(String key){ // Input binary, Output binary
         String[] keys = new String[11];
         StringBuilder str = new StringBuilder();
-        keys[0] = "0".repeat(128 - key.length()) + key;
+        keys[0] = "0".repeat(192 - key.length()) + key;
         String temp;
         String temp2;
-        for(int i = 1; i < 11; i++){
-            //w[3] editing
-            temp2 = keys[i-1].substring(104,128) + keys[i-1].substring(96,104); //rotate
+        String output = keys[0];
+        for(int i = 1; i < 9; i++){
+            //w[5] editing
+            temp2 = keys[i-1].substring(168,192) + keys[i-1].substring(160,168); //rotate
             temp2 = subBytesKey(temp2); //subbyte
             temp2 = addRcon(temp2, rcon[i-1]);
-            temp = Helper.xor(keys[i-1].substring(0,32), //w[0] xor w[3]
-                temp2, 32);
+            temp = Helper.xor(keys[i-1].substring(0,32), temp2, 32);//w[0] xor w[3]
             str.append(temp);
             temp = Helper.xor(temp, keys[i-1].substring(32,64), 32); // temp xor w[1]
             str.append(temp);
@@ -268,16 +268,22 @@ public class AES {
             str.append(temp);
             temp = Helper.xor(temp, keys[i-1].substring(96,128), 32); // temp xor w[3]
             str.append(temp);
+            temp = Helper.xor(temp, keys[i-1].substring(128,160), 32); // temp xor w[4]
+            str.append(temp);
+            temp = Helper.xor(temp, keys[i-1].substring(160,192), 32); // temp xor w[5]
+            str.append(temp);
             keys[i] = str.toString();
+            output += str.toString();
             str = new StringBuilder();
         }
-        return keys;
+        return output;
     }
 
     public String[][] encryptBlock(String[][] block){
-        String[] keys = keySchedule(this.key);
-        String[][] encrypt = addRoundKey(block, keys[0]);
-        for(int i = 0; i < 9; i++){
+        String keys = keySchedule(this.key);
+        String[][] encrypt = addRoundKey(block, keys.substring(0, 128));
+
+        for(int i = 1; i < 12; i++){
             //(Rounds based off key size)
             // Byte Substitution
             encrypt = subBytes(encrypt);
@@ -289,23 +295,26 @@ public class AES {
             encrypt = mixColumn(encrypt);
 
             //Key addition 
-            encrypt = addRoundKey(encrypt, keys[i+1]);
-
+            encrypt = addRoundKey(encrypt, keys.substring(i*128, i*128+128));
         }
         //Final Round
         encrypt = subBytes(encrypt);
         //Shift Row
         encrypt = shiftRow(encrypt);
         //Key addition 
-        encrypt = addRoundKey(encrypt, keys[10]);
+
+        encrypt = addRoundKey(encrypt, keys.substring(1536, 1664));
         //Final Round no mix column
+
         return encrypt;
     }
     
     public String[][] decryptBlock(String[][] block){
-        String[] keys = keySchedule(this.key);
-        String[][] decrypt = addRoundKey(block, keys[10]);
-        for(int i = 9; i > 0; i--){
+        String keys = keySchedule(this.key);
+        String[][] decrypt = addRoundKey(block, keys.substring(1536, 1664));
+        System.out.println(new BigInteger(keys.substring(1536, 1664), 2).toString(16));
+        System.out.println("Round 0: " +Helper.ArrayToString(decrypt));
+        for(int i = 11; i > 0; i--){
             //(Rounds based off key size)
             //Shift Row
             decrypt = invShiftRow(decrypt);
@@ -314,10 +323,12 @@ public class AES {
             decrypt = invSubBytes(decrypt);
    
             //Key addition 
-            decrypt = addRoundKey(decrypt, keys[i]);
+
+            decrypt = addRoundKey(decrypt, keys.substring(i*128, i*128+128));
 
             // Mix Column
             decrypt = invMixColumn(decrypt);
+
 
         }
         decrypt = invShiftRow(decrypt);
@@ -326,7 +337,7 @@ public class AES {
         decrypt = invSubBytes(decrypt);
         //Shift Row
         //Key addition 
-        decrypt = addRoundKey(decrypt, keys[0]);
+        decrypt = addRoundKey(decrypt, keys.substring(0, 128));
         //Final Round no mix column
 
         return decrypt;
@@ -411,6 +422,7 @@ public class AES {
         }
         return str.toString();
     }
+
 }
 
 
