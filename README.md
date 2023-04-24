@@ -1,13 +1,13 @@
 # File Sharer
 File Sharer is a cryptography project that utilizes AES, RSA, and Hash functions to provide a "secure" file sharing service.
-This project aims to provide a secure platform for sharing files between users by encrypting and storing the file's data using AES, 
-encrypting the symmetric key using RSA, and uses Hash for password and user authentication.
+This project aims to provide a secure platform for sharing files between users by encrypting and storing the file's data through using AES,then
+encrypting the symmetric key through RSA, and uses Hash for password and user authentication.
 
 ## Security
-The AES algorithm uses a 128-bit key, RSA uses a 2048-bit key.
+The AES algorithm uses a 192-bit key, RSA uses a 2048-bit key.
 
 ## Limitations and Issues
-- Keep file size under 80 MB
+- Keep file size under 10 MB for a reasonable execution time.
 - Generating primes and keys for RSA takes a while
 - Need to find a better way to sensitive information
 
@@ -16,14 +16,15 @@ The AES algorithm uses a 128-bit key, RSA uses a 2048-bit key.
 `git clone https://github.com/akukerang/filesharer.git`
 2. Create an MySQL server, and run the following queries
 ```
+CREATE DATABASE FILES;
 USE FILES;
-
 CREATE TABLE USERS (
 	ID INT PRIMARY KEY AUTO_INCREMENT,
 	USERNAME VARCHAR(256),
     	PASSWORDHASH VARCHAR(256),
     	PUBLICKEY VARCHAR(1300),
-    	MASTERKEY VARCHAR(650)
+    	MASTERKEY VARCHAR(650),
+	MASTERKEY VARCHAR(60
 );
 
 CREATE TABLE FILES (
